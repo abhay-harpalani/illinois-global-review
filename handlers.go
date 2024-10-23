@@ -58,7 +58,7 @@ func sectionHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 		// Check if the file is not a directory
-		if !info.IsDir() {
+		if !info.IsDir() && info.Name() != ".gitignore" {
 			// Read the file content
 			p, _ := loadPage(info.Name()[:len(info.Name())-4])
 			// Append the file content as a string to the slice if the tag is correct
@@ -255,7 +255,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		// Check if the file is not a directory
 		if !info.IsDir() && info.Name() != ".gitignore" {
 			// Read the file content
-			fmt.Printf("Loading file: %s\n", info.Name())
+			fmt.Printf("Loading file: %s.txt\n", info.Name()[:len(info.Name())-1])
 			p, _ := loadPage(info.Name()[:len(info.Name())-4])
 			// Append the file content as a string to the slice
 			articleArray = append(articleArray, p)
