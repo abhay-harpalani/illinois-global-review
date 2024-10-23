@@ -1,0 +1,228 @@
+/* site colors */
+:root {
+	--igr-tan: #fffbf6;
+	--igr-black: #000000;
+	--igr-gray: #666664;
+}
+
+/* -- remove default styles -- */
+h1, h2, h3, h4, p {
+	font-style: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	font-size: inherit;
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+body {
+	margin: 0;
+	background-color: var(--igr-tan);
+	/* default text color is black */
+	color: var(--igr-black);
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background-color: var(--igr-black);
+}
+
+
+/* -- fonts -- */
+/* geller headline */
+h1 {
+	font-family: geller-headline, serif;
+	font-weight: 900;
+	font-style: normal;
+	text-align: center;
+}
+
+/* stix two text semibold italic */
+h2 {
+	font-family: "STIX Two Text", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* stix two text regular */
+p, h3 {
+  font-family: "STIX Two Text", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* neue haas grotesk light */
+h4 {
+	font-family: neue-haas-grotesk-display, sans-serif;
+	font-weight: 400;
+	font-style: normal;
+}
+
+/* -- font sizes -- */
+.font-size-title {
+	font-size: 4.5rem;
+}
+
+.font-size-section-title {
+  font-size: 2rem;
+}
+
+.font-size-navbar {
+	font-size: 1.25rem;
+}
+
+.font-size-card-big-title {
+	font-size: 1.75rem;
+}
+
+.font-size-card-big-subtitle {
+	font-size: 1.25rem;
+}
+
+.font-size-card-small-title {
+	font-size: 1.75rem;
+}
+
+.font-size-card-small-subtitle {
+	font-size: 1.25rem;
+}
+
+.font-size-footer {
+	font-size: 1.5rem;
+}
+
+/* -- element formatting -- */
+.main {
+	width: 80%;
+	margin: 0 auto;
+}
+
+.navbar-wrapper {
+	display: flex;
+	width: 100%;
+}
+
+.navbar {
+	flex: 1;
+	text-align: center;
+	color: var(--igr-gray);
+}
+
+.card-big-wrapper {
+	margin-top: 4rem;
+}
+
+.card-big {
+	display: flex;
+	flex-direction: row;
+}
+	
+.card-big-text-wrapper {
+	flex: 1;
+	margin: 0.5rem;
+}
+
+.card-big-subtitle {
+	margin-top: 0.5rem;
+	color: var(--igr-gray);
+}
+
+.card-big-image-wrapper {
+	flex: 1;
+}
+
+.card-big-image-wrapper img {
+	width: 100%;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.main hr {
+	background-color: #999;
+	margin: 1rem 0.5rem;
+}
+
+
+.card-small-row {
+	display: flex;
+	flex-direction: row;
+	gap: 4rem;
+	margin-top: 2rem;
+}
+
+.card-small-image-wrapper img {
+	width: 100%;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+
+.card-small-row a {
+	flex: 1;
+	width: 100%;
+}
+
+.card-small-subtitle {
+	color: var(--igr-gray);
+}
+
+footer {
+	height: fit-content;
+	margin-top: 1rem;
+	margin-bottom: 2rem;
+}
+
+/* adjust font sizes on screens < 950 px wide */
+@media screen and (max-width: 950px) {
+	.main {
+		width: 90%;
+		margin: 0 auto;
+	}
+
+	.font-size-title {
+		font-size: 2.5rem;
+	}
+
+	.font-size-section-title {
+		font-size: 1.25rem;
+	}
+
+	.font-size-navbar {
+		font-size: 0.75rem;
+	}
+
+	.font-size-card-big-title {
+		font-size: 1rem;
+	}
+
+	.font-size-card-big-subtitle {
+		font-size: 0.75rem;
+	}
+
+	.font-size-card-small-title {
+		font-size: 0.75rem;
+	}
+
+	.font-size-card-small-subtitle {
+		font-size: 0.75rem;
+	}
+
+	.font-size-footer {
+		font-size: 1rem;
+	}
+	
+	.card-small-row {
+		gap: 1rem;
+	}
+}

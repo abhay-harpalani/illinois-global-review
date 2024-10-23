@@ -1,0 +1,27 @@
+<h1>Editing Article</h1>
+
+<form action="/save/{{.ID}}" enctype="multipart/form-data" method="POST">
+	<div>Title: <input name="title" value='{{printf "%s" .Title}}'></input></div>
+	<div>Author: <input name="author" value='{{printf "%s" .Author}}'></input></div>
+	<p>Body (markdown):</p>
+	<div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
+	
+	<p>Cover Image:</p>
+	<input type="file" name="coverImage"/>
+
+	<p>Tags:</p>
+	<input type="checkbox" id="na_tag" name="na" {{if eq (index .TagsInt 0) 1}} checked {{end}}>
+  <label for="na_tag">North America</label><br>
+	<input type="checkbox" id="sa_tag" name="sa" {{if eq (index .TagsInt 1) 1}} checked {{end}}>
+  <label for="sa_tag">South America</label><br>
+	<input type="checkbox" id="eu_tag" name="eu" {{if eq (index .TagsInt 2) 1}} checked {{end}}>
+  <label for="eu_tag">Europe</label><br>
+	<input type="checkbox" id="af_tag" name="af" {{if eq (index .TagsInt 3) 1}} checked {{end}}>
+  <label for="af_tag">Africa</label><br>
+	<input type="checkbox" id="as_tag" name="as" {{if eq (index .TagsInt 4) 1}} checked {{end}}>
+  <label for="as_tag">Asia</label><br>
+	<input type="checkbox" id="oc_tag" name="oc" {{if eq (index .TagsInt 5) 1}} checked {{end}}>
+  <label for="oc_tag">Oceania</label><br>
+	
+	<div><input type="submit" value="Save"></div>
+</form>
