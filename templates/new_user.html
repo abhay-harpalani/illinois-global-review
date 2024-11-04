@@ -1,8 +1,24 @@
-<h1>New User</h1>
-<form action="/new_user_created/" method="POST">
-	<label for="username">Username:</label>
-	<input type="text" id="username" name="username" required><br>
-	<label for="password">Password:</label>
-	<input type="password" id="password" name="password" required><br>
-	<button type="submit">Login</button>
-</form>
+{% from "macros.html" import get_form_head %}
+<!DOCTYPE html>
+<html lang="en">
+	{{ get_form_head(title) }}
+    <body>
+        <h1 class="form-header left-aligned-text font-size-title">New User</h1>
+        <form action="/new_user/{{ otp }}" method="POST">
+            {{ form.csrf_token }}
+            <p>{{ form.email.label }} {{ form.email(size=20) }}</p>
+            <p>{{ form.name.label }} {{ form.name(size=20) }}</p>
+            <p>{{ form.username.label }} {{ form.username(size=20) }}</p>
+            <p>{{ form.password.label }} {{ form.password(size=20) }}</p>
+            <p>{{ form.confirm_password.label }} {{ form.confirm_password(size=20) }}</p>
+            {% if get_flashed_messages() %}
+                <ul class="errors">
+                {% for error in get_flashed_messages() %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            <button type="submit">Create User</button>
+        </form>
+    </body>
+</html>
