@@ -1,0 +1,35 @@
+.new-article-button {
+	background-color: var(--igr-gray); /* Green */
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 1rem 0;
+	cursor: pointer;
+	border-radius: 10px;
+}
+
+.new-article-button:hover {
+	background-color: var(--igr-black);
+}
+
+.card-all-articles {
+	display: flex;
+	flex-direction: row;
+	margin: 1rem 0;
+}
+
+.card-all-articles-image-wrapper {
+	margin-right: 0.5rem;
+}
+
+.card-all-articles-image-wrapper img {
+	height: 8rem;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+}

@@ -1,27 +1,34 @@
-<h1>Editing Article</h1>
-
-<form action="/save/{{.ID}}" enctype="multipart/form-data" method="POST">
-	<div>Title: <input name="title" value='{{printf "%s" .Title}}'></input></div>
-	<div>Author: <input name="author" value='{{printf "%s" .Author}}'></input></div>
-	<p>Body (markdown):</p>
-	<div><textarea name="body" rows="20" cols="80">{{printf "%s" .Body}}</textarea></div>
-	
-	<p>Cover Image:</p>
-	<input type="file" name="coverImage"/>
-
-	<p>Tags:</p>
-	<input type="checkbox" id="na_tag" name="na" {{if eq (index .TagsInt 0) 1}} checked {{end}}>
-  <label for="na_tag">North America</label><br>
-	<input type="checkbox" id="sa_tag" name="sa" {{if eq (index .TagsInt 1) 1}} checked {{end}}>
-  <label for="sa_tag">South America</label><br>
-	<input type="checkbox" id="eu_tag" name="eu" {{if eq (index .TagsInt 2) 1}} checked {{end}}>
-  <label for="eu_tag">Europe</label><br>
-	<input type="checkbox" id="af_tag" name="af" {{if eq (index .TagsInt 3) 1}} checked {{end}}>
-  <label for="af_tag">Africa</label><br>
-	<input type="checkbox" id="as_tag" name="as" {{if eq (index .TagsInt 4) 1}} checked {{end}}>
-  <label for="as_tag">Asia</label><br>
-	<input type="checkbox" id="oc_tag" name="oc" {{if eq (index .TagsInt 5) 1}} checked {{end}}>
-  <label for="oc_tag">Oceania</label><br>
-	
-	<div><input type="submit" value="Save"></div>
-</form>
+{% from "macros.html" import get_form_head %}
+<body>
+    {{ get_form_head("Edit") }}
+    <h1 class="form-header left-aligned-text font-size-title">Editing Article</h1>
+    <form action="/edit/{{ article_id }}.html" enctype="multipart/form-data" method="POST">
+        {{ form.hidden_tag() }}
+        <p>{{ form.title.label }} {{ form.title(size=32) }}</p>
+        <p>{{ form.author.label }} {{ form.author(size=32) }}</p>
+        <p>{{ form.body.label }} {{ form.body(rows=32, cols=80) }}</p>
+        <p>{{ form.cover_image.label }} {{ form.cover_image() }}</p>
+        {% if form.cover_image.errors %}
+            <span class="error">{{ form.cover_image.errors[0] }}</span>
+        {% endif %}
+        <p>{{ form.cover_image_alt_text.label }} {{ form.cover_image_alt_text(size=32) }}</p>
+        <p>{{ form.cover_image_source.label }} {{ form.cover_image_source(size=32) }}</p>
+        <fieldset>
+            <legend>Continent Tags</legend>
+            <p>{{ form.na_tag.label }} {{ form.na_tag() }}</p>
+            <p>{{ form.sa_tag.label }} {{ form.sa_tag() }}</p>
+            <p>{{ form.eu_tag.label }} {{ form.eu_tag() }}</p>
+            <p>{{ form.af_tag.label }} {{ form.af_tag() }}</p>
+            <p>{{ form.as_tag.label }} {{ form.as_tag() }}</p>
+            <p>{{ form.oc_tag.label }} {{ form.oc_tag() }}</p>
+        </fieldset>
+        {% if get_flashed_messages() %}
+            <ul class="errors">
+            {% for error in get_flashed_messages() %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        <button type="submit">Save</button>
+    </form>
+</body>

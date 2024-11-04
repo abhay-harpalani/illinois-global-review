@@ -1,0 +1,14 @@
+{% from "macros.html" import get_html_head, get_navbar, get_footer %}
+<!DOCTYPE html>
+<html lang="en">
+	{{ get_html_head(title, css_imports) }}
+	<body>
+		<div class="main">
+			{{ get_navbar() }}
+			<hr>
+			{% block content %}{% endblock %}
+			<hr>
+			{{ get_footer() }}
+		</div>
+	</body>
+</html>

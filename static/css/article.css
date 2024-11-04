@@ -27,6 +27,21 @@
   background-repeat: no-repeat;
 }
 
+.image-source a {
+  text-decoration: underline;
+}
+.image-source a:link {
+  color: #0000EE;
+}
+
+.image-source a:visited {
+  color: #551A8B;
+}
+
+.image-source a:active {
+  color: #FF0000;
+}
+
 .article-content {
   width: 40rem;
   margin: 3rem auto 0;
@@ -43,7 +58,7 @@
     margin: 3rem auto 0;
   }
 }
-  
+
 /* adjust styles on screens < 600 px wide */
 @media screen and (max-width: 600px) {
   .font-size-article-title {

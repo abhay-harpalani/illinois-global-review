@@ -1,0 +1,8 @@
+form  { display: table; margin: 0 1.25rem;}
+p     { display: table-row; }
+label { display: table-cell; margin: 0 0.5rem; }
+input { display: table-cell; margin: 0 0.5rem; }
+
+.form-header {
+    margin-left: 1.25rem;
+}
