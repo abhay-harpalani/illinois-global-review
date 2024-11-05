@@ -272,7 +272,7 @@ def section(url_tag):
 @app.route("/edit/", methods=['GET', 'POST'])
 def edit(article_id=None):
 	if not current_user.is_authenticated:
-		render_template("403.html", current_user=current_user)
+		return render_template("403.html", current_user=current_user)
 	form = ArticleForm()
 	if form.validate_on_submit():
 		title = form.title.data
