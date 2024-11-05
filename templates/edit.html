@@ -22,13 +22,13 @@
             <p>{{ form.as_tag.label }} {{ form.as_tag() }}</p>
             <p>{{ form.oc_tag.label }} {{ form.oc_tag() }}</p>
         </fieldset>
-        {% if get_flashed_messages() %}
+        {% with messages = get_flashed_messages() %}
             <ul class="errors">
-            {% for error in get_flashed_messages() %}
+            {% for error in messages %}
                 <li>{{ error }}</li>
             {% endfor %}
             </ul>
-        {% endif %}
+        {% endwith %}
         <button type="submit">Save</button>
     </form>
 </body>

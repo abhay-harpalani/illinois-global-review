@@ -1,7 +1,7 @@
 {% from "macros.html" import get_form_head %}
 <!DOCTYPE html>
 <html lang="en">
-	{{ get_form_head(title) }}
+	{{ get_form_head("New User") }}
     <body>
         <h1 class="form-header left-aligned-text font-size-title">New User</h1>
         <form action="/new_user/{{ otp }}" method="POST">
@@ -11,13 +11,13 @@
             <p>{{ form.username.label }} {{ form.username(size=20) }}</p>
             <p>{{ form.password.label }} {{ form.password(size=20) }}</p>
             <p>{{ form.confirm_password.label }} {{ form.confirm_password(size=20) }}</p>
-            {% if get_flashed_messages() %}
+            {% with messages = get_flashed_messages() %}
                 <ul class="errors">
-                {% for error in get_flashed_messages() %}
+                {% for error in messages %}
                     <li>{{ error }}</li>
                 {% endfor %}
                 </ul>
-            {% endif %}
+            {% endwith %}
             <button type="submit">Create User</button>
         </form>
     </body>

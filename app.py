@@ -173,7 +173,9 @@ def save_article(article: Article):
 		f.write(file_content)
 
 def hash_password(password: str) -> str:
-	return str(bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()))
+	salt = bcrypt.gensalt()
+	pw = bcrypt.hashpw(password.encode('utf-8'), salt)
+	return pw.decode('utf-8')
 
 
 def get_all_articles():
@@ -272,91 +274,90 @@ def edit(article_id=None):
 	if not current_user.is_authenticated:
 		render_template("403.html", current_user=current_user)
 	form = ArticleForm()
-	if not form.validate_on_submit():
-		# if request.method == 'POST':
-		# 	flash()
-		# else:
-		article = None
-		if article_id is None or not os.path.isfile("articles/" + article_id + ".txt"):
-			article_id = random.randint(0, 2 ** 31)
-		else:
-			# file exists -> populate form
-			article, _ = load_article(article_id)
-			article.body = article.body.replace("\n<br>\n<br>\n", "\n\n")
+	if form.validate_on_submit():
+		title = form.title.data
+		author = form.author.data
+		creation_date_epoch = time.time()
+		edit_date_epoch = 0
+		body = str(form.body.data).replace("\r\n\r\n", "\n<br>\n<br>\n").replace("\n\n", "\n<br>\n<br>\n")
 
-			form = ArticleForm(obj=article)
-			form.na_tag.data = "na" in article.tags
-			form.sa_tag.data = "sa" in article.tags
-			form.eu_tag.data = "eu" in article.tags
-			form.af_tag.data = "af" in article.tags
-			form.as_tag.data = "as" in article.tags
-			form.oc_tag.data = "oc" in article.tags
-		return render_template("edit.html", form=form, article=article, article_id=article_id, current_user=current_user)
+		# handle cover image
+		cover_image = form.cover_image.data
+		_, file_extension = os.path.splitext(cover_image.filename)
+		unique_filename = article_id + file_extension
+		cover_image_name = os.path.join("static/article_img", unique_filename)
+		cover_image.save(cover_image_name) # save uploaded image
+		cover_image_name = "/" + cover_image_name
 
-	title = form.title.data
-	author = form.author.data
-	creation_date_epoch = time.time()
-	edit_date_epoch = 0
-	body = str(form.body.data).replace("\r\n\r\n", "\n<br>\n<br>\n").replace("\n\n", "\n<br>\n<br>\n")
+		cover_image_alt_text = form.cover_image_alt_text.data
+		cover_image_source = form.cover_image_source.data
+		tags_data = [form.na_tag.data, form.sa_tag.data, form.eu_tag.data, form.af_tag.data, form.as_tag.data,
+					 form.oc_tag.data]
+		tags = []
+		if tags_data[0]:
+			tags.append("na")
+		if tags_data[1]:
+			tags.append("sa")
+		if tags_data[2]:
+			tags.append("eu")
+		if tags_data[3]:
+			tags.append("af")
+		if tags_data[4]:
+			tags.append("as")
+		if tags_data[5]:
+			tags.append("oc")
+		article = Article(title=title, author=author, article_id=article_id, creation_date_epoch=creation_date_epoch,
+						  edit_date_epoch=edit_date_epoch, tags=tags, cover_image_name=cover_image_name,
+						  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source, body=body)
+		save_article(article)
+		return redirect(url_for("articles", article_id=article.article_id))
+	article = None
+	if article_id is None or not os.path.isfile("articles/" + article_id + ".txt"):
+		# article_id is None -> called /edit/ (new article)
+		# not os.path.isfile("articles/" + article_id + ".txt") -> called /edit/<article_id> on nonexistent article_id
+		article_id = random.randint(0, 2**31)
+	else:
+		# article already exists (editing existing article) -> populate form
+		article, _ = load_article(article_id)
+		article.body = article.body.replace("\n<br>\n<br>\n", "\n\n")
 
-	# Handle cover image
-	cover_image = form.cover_image.data
-	_, file_extension = os.path.splitext(cover_image.filename)
-	unique_filename = article_id + file_extension
-	cover_image_name = os.path.join("static/article_img", unique_filename)
-	cover_image.save(cover_image_name)  # Save the uploaded image
-	cover_image_name = "/" + cover_image_name
-
-	cover_image_alt_text = form.cover_image_alt_text.data
-	cover_image_source = form.cover_image_source.data
-	tags_data = [form.na_tag.data, form.sa_tag.data, form.eu_tag.data, form.af_tag.data, form.as_tag.data, form.oc_tag.data]
-	tags = []
-	if tags_data[0]:
-		tags.append("na")
-	if tags_data[1]:
-		tags.append("sa")
-	if tags_data[2]:
-		tags.append("eu")
-	if tags_data[3]:
-		tags.append("af")
-	if tags_data[4]:
-		tags.append("as")
-	if tags_data[5]:
-		tags.append("oc")
-	article = Article(title=title, author=author, article_id=article_id, creation_date_epoch=creation_date_epoch,
-					  edit_date_epoch=edit_date_epoch, tags=tags, cover_image_name=cover_image_name,
-					  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source, body=body)
-	save_article(article)
-	return redirect(url_for("articles", article_id=article.article_id))
+		form = ArticleForm(obj=article)
+		form.na_tag.data = "na" in article.tags
+		form.sa_tag.data = "sa" in article.tags
+		form.eu_tag.data = "eu" in article.tags
+		form.af_tag.data = "af" in article.tags
+		form.as_tag.data = "as" in article.tags
+		form.oc_tag.data = "oc" in article.tags
+	return render_template("edit.html", form=form, article=article, article_id=article_id, current_user=current_user)
 
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login/", methods=['GET', 'POST'])
 def login():
 	form = LoginForm()
 	if form.validate_on_submit():
 		username = form.username.data
 		password = form.password.data
 		remember_me = form.remember_me.data
-		print("u:", username, "p:", password, "rm:", remember_me)
 
 		if not os.path.isfile('users/' + username + ".txt"):
 			# user tried to log in to account that doesn't exist
 			flash("Invalid username or password.", "danger")
+			return render_template("login.html", form=form, current_user=current_user)
 		else:
 			with open('users/' + username + ".txt", "r") as f:
 				# get hashed_password line from user file
 				hashed_password = f.readlines()[1]
-			hashed_input = hash_password(password)
 			user = load_user(username)
 
-			if hashed_input != hashed_password:
+			if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
 				flash("Invalid username or password.", "danger")
+				return render_template("login.html", form=form, current_user=current_user)
 			login_user(user, remember=remember_me)
 			return redirect(url_for("dashboard"))
 	return render_template("login.html", form=form, current_user=current_user)
 
 
-@app.route("/logout", methods=['GET', 'POST'])
+@app.route("/logout/", methods=['GET', 'POST'])
 def logout():
 	logout_user()
 	return redirect("/")
@@ -376,10 +377,8 @@ def new_user(new_user_otp):
 		name = form.name.data
 		username = form.username.data
 		password = form.password.data
-		print("a", 'users/' + username + ".txt")
 
 		if os.path.isfile('users/' + username + ".txt"):
-			print("a")
 			# user tried to create username that already exists
 			flash("That username already exists, please pick a different one.", "danger")
 			form.username.data = ""
@@ -395,13 +394,8 @@ def new_user(new_user_otp):
 
 			with open('new_user_otp_list.txt', 'r') as f:
 				old_content = f.read().split("\n")
-			print(old_content)
-			[print(i == new_user_otp) for i in old_content]
 			old_content.remove(str(new_user_otp))
 			new_content = "\n".join(old_content)
-			print(old_content)
-			print(new_content)
-			[print(i == new_user_otp) for i in old_content]
 			with open('new_user_otp_list.txt', 'w') as f:
 				f.write(new_content)
 
@@ -409,18 +403,15 @@ def new_user(new_user_otp):
 	return render_template("new_user.html", form=form, otp=new_user_otp, current_user=current_user)
 
 
-@app.route("/dashboard", methods=['GET'])
+@app.route("/dashboard/", methods=['GET'])
 def dashboard():
 	if not current_user.is_authenticated:
 		return render_template("403.html", current_user=current_user)
-	print(get_all_articles())
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
 
 @app.route("/")
 def index_handler():
-	print("url", request.url)
-	return render_template("index.html", title="Test Article")
-	# return "Hello World!"
+	return render_template("index.html", title="Home")
 
 if __name__ == "__main__":
-	app.run(debug=False)
+	app.run(debug=True)
