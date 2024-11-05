@@ -1,19 +1,8 @@
-import time
-from jinja2 import TemplateError
-from flask import Flask, redirect, url_for, render_template, flash, request
-from flask_login import LoginManager, login_user, logout_user, current_user
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import BooleanField, StringField, PasswordField, TextAreaField
-from wtforms.validators import DataRequired, EqualTo, Length
-from typing import List
-import os
-import os.path
-import bcrypt
-import random
-
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
+<<<<<<< Updated upstream:news.py
+=======
 # used for sessions
 with open(".env", 'r') as f:
 	app.secret_key = f.read()
@@ -166,7 +155,7 @@ def load_article(article_id: str) -> (Article, Exception):
 
 def save_article(article: Article):
 	article_path = "articles/" + article.article_id + ".txt"
-	with (open(article_path, 'w') as f):
+	with open(article_path, 'w') as f:
 		file_content = article.title + "\n" + article.author + "\n" + article.article_id + "\n"
 		file_content += str(article.creation_date_epoch) + "\n" + str(article.edit_date_epoch) + "\n" + " ".join(article.tags)
 		file_content += "\n" + article.cover_image_name + "\n" + article.cover_image_alt_text + "\n"
@@ -204,7 +193,7 @@ def index():
 	articles_big_card = article_list[:2]
 	# the 15 articles after that (5 rows of 3 articles) go in small cards on home page
 	# articles_small_card is a list of lists, where each inner element is a row of Article objects to be displayed
-	articles_small_card = [article_list[i:i+3] for i in range(2, len(article_list[:17]), 3)]
+	articles_small_card = [article_list[i:i+3] for i in range(2, min(17, len(article_list)), 3)]
 	return render_template("index.html", title="Home", articles_big_card=articles_big_card,
 						   articles_small_card=articles_small_card, current_user=current_user)
 
@@ -416,7 +405,13 @@ def dashboard():
 		return render_template("403.html", current_user=current_user)
 	print(get_all_articles())
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
+>>>>>>> Stashed changes:app.py
 
+@app.route("/")
+def index_handler():
+	print("url", request.url)
+	return render_template("index.html", title="Test Article")
+	# return "Hello World!"
 
 if __name__ == "__main__":
-	app.run(host='0.0.0.0', port=8080, debug=True)
+	app.run(debug=False)
