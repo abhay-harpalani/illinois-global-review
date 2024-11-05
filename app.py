@@ -1,8 +1,18 @@
-from flask import Flask, request, render_template
+import time
+from jinja2 import TemplateError
+from flask import Flask, redirect, url_for, render_template, flash, request
+from flask_login import LoginManager, login_user, logout_user, current_user
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import BooleanField, StringField, PasswordField, TextAreaField
+from wtforms.validators import DataRequired, EqualTo, Length
+from typing import List
+import os
+import os.path
+import bcrypt
+import random
 
 app = Flask(__name__)
-<<<<<<< Updated upstream:news.py
-=======
 # used for sessions
 with open(".env", 'r') as f:
 	app.secret_key = f.read()
@@ -405,7 +415,6 @@ def dashboard():
 		return render_template("403.html", current_user=current_user)
 	print(get_all_articles())
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
->>>>>>> Stashed changes:app.py
 
 @app.route("/")
 def index_handler():
