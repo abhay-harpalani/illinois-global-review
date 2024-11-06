@@ -126,7 +126,7 @@ h4 {
 }
 
 .card-big-wrapper {
-	margin-top: 4rem;
+	margin-top: 2rem;
 }
 
 .card-big {
@@ -163,9 +163,9 @@ h4 {
 
 
 .card-small-row {
-	display: flex;
-	flex-direction: row;
-	gap: 4rem;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	column-gap: 4rem;
 	margin-top: 2rem;
 }
 
@@ -233,5 +233,11 @@ footer {
 	
 	.card-small-row {
 		gap: 1rem;
+	}
+}
+
+@media screen and (max-width: 450px) {
+	.font-size-title {
+		font-size: 1.8rem;
 	}
 }
