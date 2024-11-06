@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block title %}Staff Dashboard{% endblock %}
+{% set title="Article Directory" %}
+{% set css_imports = ['<link rel="stylesheet" href="/static/css/dashboard.css">'] %}
+{% block content %}
+<div class="dashboard">
+    <h1 class="left-aligned-text font-size-title">Article Directory</h1>
+    <div class="card-all-articles-column">
+        {% for article in article_list %}
+        <a href="/articles/{{ article.article_id }}.html">
+            <div class="card-all-articles">
+                <div class="card-all-articles-image-wrapper">
+                    <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">
+                </div>
+                <div class="card-all-articles-text-wrapper">
+                    <h2 class="font-size-card-small-title">{{ article.title }}</h2>
+                    <h3 class="card-small-subtitle font-size-card-small-subtitle">By {{ article.author }}</h3>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

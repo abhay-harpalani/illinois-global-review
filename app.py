@@ -200,7 +200,6 @@ def get_all_articles():
 @app.route("/", methods=['GET'])
 def index():
 	article_list = get_all_articles()
-
 	# 2 most recent articles go in big cards at top of home page
 	articles_big_card = article_list[:2]
 	# the 15 articles after that (5 rows of 3 articles) go in small cards on home page
@@ -266,6 +265,12 @@ def section(url_tag):
 	except TemplateError:
 		print("error rendering section", section_name)
 		return redirect("/")
+
+
+@app.route("/directory/", methods=['GET'])
+def directory():
+	article_list = get_all_articles()
+	return render_template("directory.html", article_list=article_list, current_user=current_user)
 
 
 @app.route("/edit/<article_id>.html", methods=['GET', 'POST'])

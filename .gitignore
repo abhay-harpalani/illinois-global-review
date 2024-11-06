@@ -2,7 +2,6 @@
 .DS_Store
 .venv/*
 .idea/*
-.env
 __pycache__/
 
 new_user_otp_list.txt
