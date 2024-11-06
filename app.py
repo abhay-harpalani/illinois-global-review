@@ -286,6 +286,8 @@ def edit(article_id=None):
 		_, file_extension = os.path.splitext(cover_image.filename)
 		unique_filename = article_id + file_extension
 		cover_image_name = os.path.join("static/article_img", unique_filename)
+		if os.path.exists(cover_image_name):
+			os.remove(cover_image_name)
 		cover_image.save(cover_image_name) # save uploaded image
 		cover_image_name = "/" + cover_image_name
 
@@ -312,7 +314,7 @@ def edit(article_id=None):
 		save_article(article)
 		return redirect(url_for("articles", article_id=article.article_id))
 	article = None
-	if article_id is None or not os.path.isfile("articles/" + article_id + ".txt"):
+	if article_id is None or not os.path.isfile("articles/" + str(article_id) + ".txt"):
 		# article_id is None -> called /edit/ (new article)
 		# not os.path.isfile("articles/" + article_id + ".txt") -> called /edit/<article_id> on nonexistent article_id
 		article_id = random.randint(0, 2**31)
@@ -414,4 +416,5 @@ def index_handler():
 	return render_template("index.html", title="Home")
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(host='0.0.0.0', debug=True)
+
