@@ -1,6 +1,6 @@
 import time
 from jinja2 import TemplateError
-from flask import Flask, redirect, url_for, render_template, flash, request
+from flask import Flask, redirect, url_for, render_template, flash
 from flask_login import LoginManager, login_user, logout_user, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -422,4 +422,3 @@ def index_handler():
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', debug=True)
-
