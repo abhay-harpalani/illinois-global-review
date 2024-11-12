@@ -5,7 +5,11 @@
 {% block content %}
 <div class="article-text-wrapper">
     <h2 class="article-title font-size-article-title">{{ article.title }}</h2>
-    <h3 class="article-subtitle font-size-article-subtitle">By {{ article.author }}</h3>
+    <h3 class="article-subtitle font-size-article-subtitle">
+        By {{ article.author }}
+        <br>
+        {{ get_article_creation_date_str(article) }}
+    </h3>
 </div>
 <div class="article-image-wrapper">
     <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">

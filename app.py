@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from jinja2 import TemplateError
 from flask import Flask, redirect, url_for, render_template, flash
 from flask_login import LoginManager, login_user, logout_user, current_user
@@ -117,6 +118,7 @@ class User:
 
 """ helper functions """
 
+
 @login_manager.user_loader
 def load_user(user_id):
 	try:
@@ -172,11 +174,21 @@ def save_article(article: Article):
 		file_content += article.cover_image_source + "\n" + article.body
 		f.write(file_content)
 
+def get_article_creation_date_str(article):
+	# return "abc"
+	dt = datetime.fromtimestamp(int(article.creation_date_epoch))
+	ret = dt.strftime("%B %d, %Y")
+	return ret
+
+@app.context_processor
+def inject_functions():
+	return dict(get_article_creation_date_str=get_article_creation_date_str)
+
+
 def hash_password(password: str) -> str:
 	salt = bcrypt.gensalt()
 	pw = bcrypt.hashpw(password.encode('utf-8'), salt)
 	return pw.decode('utf-8')
-
 
 def get_all_articles():
 	article_list = []
@@ -193,6 +205,8 @@ def get_all_articles():
 	# sort article_list in descending order so that most recent articles are towards front of list
 	article_list.sort(key=lambda article: article.creation_date_epoch, reverse=True)
 	return article_list
+
+
 """ routing functions """
 
 
@@ -282,7 +296,7 @@ def edit(article_id=None):
 	if form.validate_on_submit():
 		title = form.title.data
 		author = form.author.data
-		creation_date_epoch = time.time()
+		creation_date_epoch = str(int(time.time()))
 		edit_date_epoch = 0
 		body = str(form.body.data).replace("\r\n\r\n", "\n<br>\n<br>\n").replace("\n\n", "\n<br>\n<br>\n")
 

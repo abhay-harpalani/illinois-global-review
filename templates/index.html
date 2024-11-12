@@ -8,7 +8,11 @@
             <div class="card-big">
                 <div class="card-big-text-wrapper">
                     <h2 class="font-size-card-big-title">{{ article.title }}</h2>
-                    <h3 class="card-big-subtitle font-size-card-big-subtitle">By {{ article.author }}</h3>
+                    <h3 class="card-big-subtitle font-size-card-big-subtitle">
+                        By {{ article.author }}
+                        <br>
+                        {{ get_article_creation_date_str(article) }}
+                    </h3>
                 </div>
                 <div class="card-big-image-wrapper">
                     <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">
@@ -29,7 +33,11 @@
                     </div>
                     <div class="card-small-text-wrapper">
                         <h2 class="font-size-card-small-title">{{ article.title }}</h2>
-                        <h3 class="card-small-subtitle font-size-card-small-subtitle">By {{ article.author }}</h3>
+                        <h3 class="card-small-subtitle font-size-card-small-subtitle">
+                            By {{ article.author }}
+                            <br>
+                            {{ get_article_creation_date_str(article) }}
+                        </h3>
                     </div>
                 </div>
             </a>
