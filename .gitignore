@@ -5,6 +5,7 @@
 __pycache__/
 
 new_user_otp_list.txt
+test_app.py
 
 # cPanel directories
 tmp/
