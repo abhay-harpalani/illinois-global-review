@@ -1,0 +1,10 @@
+<body>
+    <form action="/upload/" enctype="multipart/form-data" method="POST">
+        {{ form.hidden_tag() }}
+        <p>{{ form.cover_image.label }} {{ form.cover_image() }}</p>
+        {% if form.cover_image.errors %}
+            <span class="error">{{ form.cover_image.errors[0] }}</span>
+        {% endif %}
+        <button type="submit">Save</button>
+    </form>
+</body>

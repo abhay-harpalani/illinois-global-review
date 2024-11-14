@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 from jinja2 import TemplateError
-from flask import Flask, redirect, url_for, render_template, flash, request
+from flask import Flask, redirect, url_for, render_template, flash, request, send_file
 from flask_login import LoginManager, login_user, logout_user, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -54,6 +54,12 @@ class ArticleForm(FlaskForm):
 	af_tag = BooleanField('Africa')
 	as_tag = BooleanField('Asia')
 	oc_tag = BooleanField('Oceania')
+
+
+class UploadForm(FlaskForm):
+	cover_image = FileField(
+		'Cover Image', validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
+	)
 
 
 class Article:
@@ -434,9 +440,22 @@ def dashboard():
 		return render_template("403.html", current_user=current_user)
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
 
+@app.route("/upload/", methods=['GET', 'POST'])
+def upload():
+	form = UploadForm()
+	if request.method == 'GET':
+		return render_template("upload.html", form=form)
+	elif request.method == 'POST' and form.validate_on_submit():
+		im = form.cover_image.data
+		im.save("temp_img.jpg")
+		return send_file("temp_img.jpg")
+	else:
+		return "error" + str(form.validate_on_submit())
+
 @app.route("/")
 def index_handler():
 	return render_template("index.html", title="Home")
+
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', debug=True)
