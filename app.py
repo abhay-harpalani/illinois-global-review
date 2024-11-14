@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 from jinja2 import TemplateError
-from flask import Flask, redirect, url_for, render_template, flash
+from flask import Flask, redirect, url_for, render_template, flash, request
 from flask_login import LoginManager, login_user, logout_user, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -14,6 +14,8 @@ import bcrypt
 import random
 
 app = Flask(__name__)
+# 16 MB
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 # used for sessions
 with open(".env", 'r') as f:
 	app.secret_key = f.read()
@@ -294,6 +296,8 @@ def edit(article_id=None):
 		return render_template("403.html", current_user=current_user)
 	form = ArticleForm()
 	if form.validate_on_submit():
+		if article_id is None:
+			article_id = str(random.randint(0, 2**31))
 		title = form.title.data
 		author = form.author.data
 		creation_date_epoch = str(int(time.time()))
@@ -336,7 +340,7 @@ def edit(article_id=None):
 	if article_id is None or not os.path.isfile("articles/" + str(article_id) + ".txt"):
 		# article_id is None -> called /edit/ (new article)
 		# not os.path.isfile("articles/" + article_id + ".txt") -> called /edit/<article_id> on nonexistent article_id
-		article_id = random.randint(0, 2**31)
+		article_id = str(random.randint(0, 2**31))
 	else:
 		# article already exists (editing existing article) -> populate form
 		article, _ = load_article(article_id)
