@@ -15,7 +15,11 @@
                 </div>
                 <div class="card-all-articles-text-wrapper">
                     <h2 class="font-size-card-small-title">{{ article.title }}</h2>
-                    <h3 class="card-small-subtitle font-size-card-small-subtitle">By {{ article.author }}</h3>
+                    <h3 class="card-small-subtitle font-size-card-small-subtitle">
+                        By {{ article.author }}
+                        <br>
+                        {{ get_article_creation_date_str(article) }}
+                    </h3>
                 </div>
             </div>
         </a>
