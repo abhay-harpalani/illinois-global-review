@@ -7,6 +7,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import BooleanField, StringField, PasswordField, TextAreaField
 from wtforms.validators import DataRequired, EqualTo, Length
+from werkzeug.utils import secure_filename
 from typing import List
 import os
 import os.path
@@ -447,8 +448,9 @@ def upload():
 		return render_template("upload.html", form=form)
 	elif request.method == 'POST' and form.validate_on_submit():
 		im = form.cover_image.data
-		im.save("temp_img.jpg")
-		return send_file("temp_img.jpg")
+		fname = os.path.join("static/test_imgs/", secure_filename(im.filename))
+		im.save(fname)
+		return send_file(fname)
 	else:
 		return "error" + str(form.validate_on_submit())
 
