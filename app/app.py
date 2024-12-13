@@ -1,25 +1,38 @@
 import time
 from datetime import datetime
-from jinja2 import TemplateError
+import os
+import os.path
 from flask import Flask, redirect, url_for, render_template, flash, request, send_file
 from flask_login import LoginManager, login_user, logout_user, current_user
+from jinja2 import TemplateError
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import BooleanField, StringField, PasswordField, TextAreaField
 from wtforms.validators import DataRequired, EqualTo, Length
 from werkzeug.utils import secure_filename
 from typing import List
-import os
-import os.path
+from dataclasses import dataclass
+from dotenv import load_dotenv, dotenv_values
 import bcrypt
-import random
+from random import choices, randint
 
 app = Flask(__name__)
+
 # 16 MB
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-# used for sessions
-with open(".env", 'r') as f:
-	app.secret_key = f.read()
+
+# create .env if it doesn't exist (used for user sessions)
+try:
+	with open('.env', 'x') as f:
+		# set key as 64 character long random string
+		ascii_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+		new_secret = ''.join(choices(ascii_chars, k=64))
+		f.write("SECRET=" + new_secret)
+except FileExistsError:
+	pass
+load_dotenv()
+
+app.secret_key = dotenv_values('.env')['SECRET']
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -45,7 +58,8 @@ class ArticleForm(FlaskForm):
 	author = StringField('Author', validators=[DataRequired()])
 	body = TextAreaField('Body', validators=[DataRequired()])
 	cover_image = FileField(
-		'Cover Image', validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
+		'Cover Image',
+		validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
 	)
 	cover_image_alt_text = StringField('Cover Image Alt Text', validators=[DataRequired()])
 	cover_image_source = StringField('Cover Image Source', validators=[DataRequired()])
@@ -59,10 +73,12 @@ class ArticleForm(FlaskForm):
 
 class UploadForm(FlaskForm):
 	cover_image = FileField(
-		'Cover Image', validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
+		'Cover Image',
+		validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
 	)
 
 
+@dataclass
 class Article:
 	title: str
 	author: str
@@ -72,7 +88,7 @@ class Article:
 	creation_date_epoch: str
 	# date that the article was last edited
 	edit_date_epoch: str
-	# tags for the article (north america, south america, asia, africa, europe, oceania)
+	# tags for the article (north america, europe, asia, africa, south america, oceania)
 	# abbreviated to "na", "sa", "eu", "af", "as", "oc"
 	tags: List[str]
 	# name of cover image so that /static/img/{cover_image_name} points to image location (includes file extension)
@@ -84,44 +100,26 @@ class Article:
 	# content of the article formatted with html tags
 	body: str
 
-	def __init__(self, title, author, article_id, creation_date_epoch, edit_date_epoch, tags, cover_image_name,
-				 cover_image_alt_text, cover_image_source, body):
-		self.title = title
-		self.author = author
-		self.article_id = article_id
-		self.creation_date_epoch = creation_date_epoch
-		self.edit_date_epoch = edit_date_epoch
-		self.tags = tags
-		self.cover_image_name = cover_image_name
-		self.cover_image_alt_text = cover_image_alt_text
-		self.cover_image_source = cover_image_source
-		self.body = body
-
 
 # stores information on people allowed to manage articles
+@dataclass
 class User:
 	username: str
 	name: str
 	# hashed_password automatically salted with bcrypt
-	hashed_password: List[bytes]
+	hashed_password: str
 	email: str
 
-	def __init__(self, username, name, hashed_password, email):
-		self.username = username
-		self.name = name
-		self.hashed_password = hashed_password
-		self.email = email
-
-	def is_authenticated(self):
+	def is_authenticated(self) -> bool:
 		return True
 
-	def is_active(self):
+	def is_active(self) -> bool:
 		return True
 
-	def is_anonymous(self):
+	def is_anonymous(self) -> bool:
 		return False
 
-	def get_id(self):
+	def get_id(self) -> str:
 		return self.username
 
 
@@ -171,23 +169,27 @@ def load_article(article_id: str) -> (Article, Exception):
 	cover_image_source = lines[8]
 	body = lines[9]
 	ret = Article(title, author, article_id, creation_date_epoch, edit_date_epoch, tags, cover_image_name,
-				  cover_image_alt_text, cover_image_source, body)
+	              cover_image_alt_text, cover_image_source, body)
 	return ret, None
+
 
 def save_article(article: Article):
 	article_path = "articles/" + article.article_id + ".txt"
 	with open(article_path, 'w') as f:
 		file_content = article.title + "\n" + article.author + "\n" + article.article_id + "\n"
-		file_content += str(article.creation_date_epoch) + "\n" + str(article.edit_date_epoch) + "\n" + " ".join(article.tags)
+		file_content += str(article.creation_date_epoch) + "\n" + str(article.edit_date_epoch) + "\n" + " ".join(
+			article.tags)
 		file_content += "\n" + article.cover_image_name + "\n" + article.cover_image_alt_text + "\n"
 		file_content += article.cover_image_source + "\n" + article.body
 		f.write(file_content)
+
 
 def get_article_creation_date_str(article):
 	# return "abc"
 	dt = datetime.fromtimestamp(int(article.creation_date_epoch))
 	ret = dt.strftime("%B %d, %Y")
 	return ret
+
 
 @app.context_processor
 def inject_functions():
@@ -198,6 +200,7 @@ def hash_password(password: str) -> str:
 	salt = bcrypt.gensalt()
 	pw = bcrypt.hashpw(password.encode('utf-8'), salt)
 	return pw.decode('utf-8')
+
 
 def get_all_articles():
 	article_list = []
@@ -227,9 +230,9 @@ def index():
 	articles_big_card = article_list[:2]
 	# the 15 articles after that (5 rows of 3 articles) go in small cards on home page
 	# articles_small_card is a list of lists, where each inner element is a row of Article objects to be displayed
-	articles_small_card = [article_list[i:i+3] for i in range(2, min(17, len(article_list)), 3)]
+	articles_small_card = [article_list[i:i + 3] for i in range(2, min(17, len(article_list)), 3)]
 	return render_template("index.html", title="Home", articles_big_card=articles_big_card,
-						   articles_small_card=articles_small_card, current_user=current_user)
+	                       articles_small_card=articles_small_card, current_user=current_user)
 
 
 @app.route("/articles/<article_id>.html", methods=['GET'])
@@ -284,7 +287,8 @@ def section(url_tag):
 	# display all section articles on this page
 	section_articles = [section_article_list[i:i + 3] for i in range(0, len(section_article_list), 3)]
 	try:
-		return render_template("section.html", title=section_name, section_articles=section_articles, current_user=current_user)
+		return render_template("section.html", title=section_name, section_articles=section_articles,
+		                       current_user=current_user)
 	except TemplateError:
 		print("error rendering section", section_name)
 		return redirect("/")
@@ -304,11 +308,11 @@ def edit(article_id=None):
 	form = ArticleForm()
 	if form.validate_on_submit():
 		if article_id is None:
-			article_id = str(random.randint(0, 2**31))
+			article_id = str(randint(0, 2 ** 31))
 		title = form.title.data
 		author = form.author.data
 		creation_date_epoch = str(int(time.time()))
-		edit_date_epoch = 0
+		edit_date_epoch = '0'
 		body = str(form.body.data).replace("\r\n\r\n", "\n<br>\n<br>\n").replace("\n\n", "\n<br>\n<br>\n")
 
 		# handle cover image
@@ -318,13 +322,13 @@ def edit(article_id=None):
 		cover_image_name = os.path.join("static/article_img", unique_filename)
 		if os.path.exists(cover_image_name):
 			os.remove(cover_image_name)
-		cover_image.save(cover_image_name) # save uploaded image
+		cover_image.save(cover_image_name)  # save uploaded image
 		cover_image_name = "/" + cover_image_name
 
 		cover_image_alt_text = form.cover_image_alt_text.data
 		cover_image_source = form.cover_image_source.data
 		tags_data = [form.na_tag.data, form.sa_tag.data, form.eu_tag.data, form.af_tag.data, form.as_tag.data,
-					 form.oc_tag.data]
+		             form.oc_tag.data]
 		tags = []
 		if tags_data[0]:
 			tags.append("na")
@@ -339,15 +343,15 @@ def edit(article_id=None):
 		if tags_data[5]:
 			tags.append("oc")
 		article = Article(title=title, author=author, article_id=article_id, creation_date_epoch=creation_date_epoch,
-						  edit_date_epoch=edit_date_epoch, tags=tags, cover_image_name=cover_image_name,
-						  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source, body=body)
+		                  edit_date_epoch=edit_date_epoch, tags=tags, cover_image_name=cover_image_name,
+		                  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source, body=body)
 		save_article(article)
 		return redirect(url_for("articles", article_id=article.article_id))
 	article = None
 	if article_id is None or not os.path.isfile("articles/" + str(article_id) + ".txt"):
 		# article_id is None -> called /edit/ (new article)
 		# not os.path.isfile("articles/" + article_id + ".txt") -> called /edit/<article_id> on nonexistent article_id
-		article_id = str(random.randint(0, 2**31))
+		article_id = str(randint(0, 2 ** 31))
 	else:
 		# article already exists (editing existing article) -> populate form
 		article, _ = load_article(article_id)
@@ -441,6 +445,7 @@ def dashboard():
 		return render_template("403.html", current_user=current_user)
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
 
+
 @app.route("/upload/", methods=['GET', 'POST'])
 def upload():
 	form = UploadForm()
@@ -453,6 +458,7 @@ def upload():
 		return send_file(fname)
 	else:
 		return "error" + str(form.validate_on_submit())
+
 
 @app.route("/")
 def index_handler():
