@@ -311,7 +311,17 @@ def edit(article_id=None):
 			article_id = str(randint(0, 2 ** 31))
 		title = form.title.data
 		author = form.author.data
-		creation_date_epoch = str(int(time.time()))
+		# only update creation date if we are creating a new article
+		# if editing an existing article keep date the same
+		print(f'articles/{article_id}.txt')
+		if os.path.isfile(f'articles/{article_id}.txt'):
+			art, _ = load_article(article_id)
+			print("art:", art)
+			creation_date_epoch = art.creation_date_epoch
+			print("creation_date_epoch:", creation_date_epoch)
+		else:
+			creation_date_epoch = str(int(time.time()))
+
 		edit_date_epoch = '0'
 		body = str(form.body.data).replace("\r\n\r\n", "\n<br>\n<br>\n").replace("\n\n", "\n<br>\n<br>\n")
 
