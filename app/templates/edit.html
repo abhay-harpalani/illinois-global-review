@@ -1,34 +1,44 @@
 {% from "macros.html" import get_form_head %}
-<body>
+<!DOCTYPE html>
+<html lang="en">
     {{ get_form_head("Edit") }}
-    <h1 class="form-header left-aligned-text font-size-title">Editing Article</h1>
-    <form action="/edit/{{ article_id }}.html" enctype="multipart/form-data" method="POST">
-        {{ form.hidden_tag() }}
-        <p>{{ form.title.label }} {{ form.title(size=32) }}</p>
-        <p>{{ form.author.label }} {{ form.author(size=32) }}</p>
-        <p>{{ form.body.label }} {{ form.body(rows=32, cols=80) }}</p>
-        <p>{{ form.cover_image.label }} {{ form.cover_image() }}</p>
-        {% if form.cover_image.errors %}
-            <span class="error">{{ form.cover_image.errors[0] }}</span>
-        {% endif %}
-        <p>{{ form.cover_image_alt_text.label }} {{ form.cover_image_alt_text(size=32) }}</p>
-        <p>{{ form.cover_image_source.label }} {{ form.cover_image_source(size=32) }}</p>
-        <fieldset>
-            <legend>Continent Tags</legend>
-            <p>{{ form.na_tag.label }} {{ form.na_tag() }}</p>
-            <p>{{ form.sa_tag.label }} {{ form.sa_tag() }}</p>
-            <p>{{ form.eu_tag.label }} {{ form.eu_tag() }}</p>
-            <p>{{ form.af_tag.label }} {{ form.af_tag() }}</p>
-            <p>{{ form.as_tag.label }} {{ form.as_tag() }}</p>
-            <p>{{ form.oc_tag.label }} {{ form.oc_tag() }}</p>
-        </fieldset>
-        {% with messages = get_flashed_messages() %}
-            <ul class="errors">
-            {% for error in messages %}
-                <li>{{ error }}</li>
-            {% endfor %}
-            </ul>
-        {% endwith %}
-        <button type="submit">Save</button>
-    </form>
-</body>
+    <body onload="setup()">
+        <h1 class="form-header left-aligned-text font-size-title">Editing Article</h1>
+        <div id="container" style="display: flex; flex-direction: row;">
+            <div id="left" style="flex: 1 1 0">
+                <form action="/edit/{{ article_id }}.html" enctype="multipart/form-data" method="POST" id="edit-form">
+                    {{ form.hidden_tag() }}
+                    <p>{{ form.title.label }} {{ form.title(size=32) }}</p>
+                    <p>{{ form.author.label }} {{ form.author(size=32) }}</p>
+                    <p>{{ form.body.label }} {{ form.body(rows=32, cols=80) }}</p>
+                    <p>{{ form.cover_image.label }} {{ form.cover_image() }}</p>
+                    {% if form.cover_image.errors %}
+                        <span class="error">{{ form.cover_image.errors[0] }}</span>
+                    {% endif %}
+                    <p>{{ form.cover_image_alt_text.label }} {{ form.cover_image_alt_text(size=32) }}</p>
+                    <p>{{ form.cover_image_source.label }} {{ form.cover_image_source(size=32) }}</p>
+                    <fieldset>
+                        <legend>Continent Tags</legend>
+                        <p>{{ form.na_tag.label }} {{ form.na_tag() }}</p>
+                        <p>{{ form.sa_tag.label }} {{ form.sa_tag() }}</p>
+                        <p>{{ form.eu_tag.label }} {{ form.eu_tag() }}</p>
+                        <p>{{ form.af_tag.label }} {{ form.af_tag() }}</p>
+                        <p>{{ form.as_tag.label }} {{ form.as_tag() }}</p>
+                        <p>{{ form.oc_tag.label }} {{ form.oc_tag() }}</p>
+                    </fieldset>
+                    {% with messages = get_flashed_messages() %}
+                        <ul class="errors">
+                        {% for error in messages %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endwith %}
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+            <div id="right" style="flex: 1 1 0">
+                <div id="rendered-showdown-output"></div>
+            </div>
+        </div>
+    </body>
+</html>
