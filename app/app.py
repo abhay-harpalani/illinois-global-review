@@ -323,7 +323,7 @@ def edit(article_id=None):
 			creation_date_epoch = str(int(time.time()))
 
 		edit_date_epoch = '0'
-		body = str(form.body.data).replace("\r\n\r\n", "\n<br>\n<br>\n").replace("\n\n", "\n<br>\n<br>\n")
+		body = str(form.body.data)
 
 		# handle cover image
 		cover_image = form.cover_image.data

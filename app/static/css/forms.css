@@ -1,8 +1,18 @@
-form  { display: table; margin: 0 1.25rem;}
-p     { display: table-row; }
-label { display: table-cell; margin: 0 0.5rem; }
-input { display: table-cell; margin: 0 0.5rem; }
+form   { display: table; margin: 0 1.25rem;}
+form p { display: table-row;}
+label  { display: table-cell; margin: 0 0.5rem;}
+input  { display: table-cell; margin: 0 0.5rem;}
 
 .form-header {
     margin-left: 1.25rem;
+}
+
+#rendered-showdown-output {
+	/* same width and font size as an actual article */
+	width: 40rem;
+	font-size: 1.25em;
+}
+
+#rendered-showdown-output p {
+    margin-bottom: 1rem;
 }
