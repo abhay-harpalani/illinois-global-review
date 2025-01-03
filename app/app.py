@@ -71,13 +71,6 @@ class ArticleForm(FlaskForm):
 	oc_tag = BooleanField('Oceania')
 
 
-class UploadForm(FlaskForm):
-	cover_image = FileField(
-		'Cover Image',
-		validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
-	)
-
-
 @dataclass
 class Article:
 	title: str
@@ -454,20 +447,6 @@ def dashboard():
 	if not current_user.is_authenticated:
 		return render_template("403.html", current_user=current_user)
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
-
-
-@app.route("/upload/", methods=['GET', 'POST'])
-def upload():
-	form = UploadForm()
-	if request.method == 'GET':
-		return render_template("upload.html", form=form)
-	elif request.method == 'POST' and form.validate_on_submit():
-		im = form.cover_image.data
-		fname = os.path.join("static/test_imgs/", secure_filename(im.filename))
-		im.save(fname)
-		return send_file(fname)
-	else:
-		return "error" + str(form.validate_on_submit())
 
 
 @app.route("/")
