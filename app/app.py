@@ -28,7 +28,7 @@ try:
 		# set key as 64 character long random string
 		ascii_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 		new_secret = ''.join(choices(ascii_chars, k=64))
-		f.write("SECRET=" + new_secret)
+		f.write(f"SECRET={new_secret}")
 except FileExistsError:
 	pass
 load_dotenv()
@@ -54,6 +54,7 @@ class LoginForm(FlaskForm):
 	remember_me = BooleanField('Remember Me?')
 
 
+# all variables in this class correspond to a member variable of the Article class
 class ArticleForm(FlaskForm):
 	title = StringField('Title', validators=[DataRequired()])
 	author = StringField('Author', validators=[DataRequired()])
@@ -64,6 +65,10 @@ class ArticleForm(FlaskForm):
 	)
 	cover_image_alt_text = StringField('Cover Image Alt Text', validators=[DataRequired()])
 	cover_image_source = StringField('Cover Image Source', validators=[DataRequired()])
+	# not required, it may be possible for an article to not need citations
+	citation = TextAreaField('Citation')
+	# each tag needs its own checkbox
+	# tags are stored in Article class as a list of strings
 	na_tag = BooleanField('North America')
 	sa_tag = BooleanField('South America')
 	eu_tag = BooleanField('Europe')
@@ -125,14 +130,14 @@ class User:
 @login_manager.user_loader
 def load_user(user_id):
 	try:
-		with open("users/" + user_id + ".txt", 'r') as f:
+		with open(f"users/{user_id}.txt", 'r') as f:
 			user_file = f.read()
 	except FileNotFoundError:
 		print("could not find user with id:", user_id)
 		return None
 	user_lines = user_file.split("\n")
 	if len(user_lines) != 4:
-		print("users/" + user_id + ".txt", "does not have exactly 4 lines (username, hashed_password, name, email)")
+		print(f"users/{user_id}.txt", "does not have exactly 4 lines (username, hashed_password, name, email)")
 		return None
 	username = user_lines[0]
 	hashed_password = user_lines[1]
@@ -153,20 +158,6 @@ def load_article(article_id: str) -> (Article, Exception):
 				return None, err
 	except FileNotFoundError:
 		return None, FileNotFoundError
-
-	title = lines[0]
-	author = lines[1]
-	article_id = lines[2]
-	creation_date_epoch = lines[3]
-	edit_date_epoch = lines[4]
-	tags = lines[5].split(" ")
-	cover_image_name = lines[6]
-	cover_image_alt_text = lines[7]
-	cover_image_source = lines[8]
-	body = lines[9]
-	ret = Article(title, author, article_id, creation_date_epoch, edit_date_epoch, tags, cover_image_name,
-	              cover_image_alt_text, cover_image_source, body)
-	return ret, None
 
 
 def save_article(article: Article):
@@ -310,9 +301,7 @@ def edit(article_id=None):
 		# if editing an existing article keep date the same
 		if os.path.isfile(f'articles/{article_id}.json'):
 			art, _ = load_article(article_id)
-			print("art:", art)
 			creation_date_epoch = art.creation_date_epoch
-			print("creation_date_epoch:", creation_date_epoch)
 		else:
 			creation_date_epoch = str(int(time.time()))
 
@@ -380,12 +369,12 @@ def login():
 		password = form.password.data
 		remember_me = form.remember_me.data
 
-		if not os.path.isfile('users/' + username + ".txt"):
+		if not os.path.isfile(f'users/{username}.txt'):
 			# user tried to log in to account that doesn't exist
 			flash("Invalid username or password.", "danger")
 			return render_template("login.html", form=form, current_user=current_user)
 		else:
-			with open('users/' + username + ".txt", "r") as f:
+			with open(f'users/{username}.txt', "r") as f:
 				# get hashed_password line from user file
 				hashed_password = f.readlines()[1]
 			user = load_user(username)
@@ -419,12 +408,12 @@ def new_user(new_user_otp):
 		username = form.username.data
 		password = form.password.data
 
-		if os.path.isfile('users/' + username + ".txt"):
+		if os.path.isfile(f'users/{username}.txt'):
 			# user tried to create username that already exists
 			flash("That username already exists, please pick a different one.", "danger")
 			form.username.data = ""
 		else:
-			user_filename = 'users/' + username + '.txt'
+			user_filename = f'users/{username}.txt'
 			hashed_password = hash_password(password)
 			with open(user_filename, 'w') as f:
 				f.write(username + "\n" + hashed_password + "\n" + name + "\n" + email)
