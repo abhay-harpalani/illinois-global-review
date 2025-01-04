@@ -1,43 +1,54 @@
-let input;
-let form;
+let body, citation, form;
 
 function setup() {
-	input = document.getElementById("body");
-	body.value = convertToMarkdown(body.value)
+	body = document.getElementById("body");
+	body.value = convertToMarkdown(body.value);
+	citation = document.getElementById("citation");
+	citation.value = convertToMarkdown(citation.value);
 
-	input.addEventListener("input", eventCallback);
-	setVal(input);
+	body.addEventListener("input", eventCallbackBody);
+	citation.addEventListener("input", eventCallbackCitation);
+	setVal(body, "rendered-showdown-body");
+	setVal(citation, "rendered-showdown-citation");
 
-	form = document.getElementById("edit-form")
+	form = document.getElementById("edit-form");
 	form.onsubmit = async (e) => {
 		e.preventDefault();
 		const form = e.currentTarget;
 		const url = form.action;
 
 		try {
-		  const formData = new FormData(form);
-		  console.log(formData)
-		  const response = await fetch(url, {
-			  method: 'POST',
-			  body: formData
-		  });
-		  console.log(response);
-		  if (response.redirected) {
-			  window.location.href = response.url;
-		  }
+			const formData = new FormData(form);
+
+			const bodyHTML = convertToHTML(formData.get("body"))
+			formData.set("body", bodyHTML)
+			const citationHTML = convertToHTML(formData.get("citation"))
+			formData.set("citation", citationHTML)
+
+			const response = await fetch(url, {
+				method: 'POST',
+				body: formData
+			});
+			console.log(response);
+			if (response.redirected) {
+				window.location.href = response.url;
+			}
 		} catch (error) {
-		  console.error(error);
+			console.error(error);
 		}
 	}
 }
 
-function eventCallback(event) {
-	setVal(event.target);
+function eventCallbackBody(event) {
+	setVal(event.target, "rendered-showdown-body");
 }
 
-function setVal(elem) {
-	document.getElementById("rendered-showdown-output").innerHTML =
-		convertToHTML(elem.value);
+function eventCallbackCitation(event) {
+	setVal(event.target, "rendered-showdown-citation");
+}
+
+function setVal(elem, target) {
+	document.getElementById(target).innerHTML = convertToHTML(elem.value);
 }
 
 function convertToHTML(md) {

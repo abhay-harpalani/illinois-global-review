@@ -17,6 +17,7 @@
                     {% endif %}
                     <p>{{ form.cover_image_alt_text.label }} {{ form.cover_image_alt_text(size=32) }}</p>
                     <p>{{ form.cover_image_source.label }} {{ form.cover_image_source(size=32) }}</p>
+                    <p>{{ form.citation.label }} {{ form.citation(rows=1, cols=80) }}</p>
                     <fieldset>
                         <legend>Continent Tags</legend>
                         <p>{{ form.na_tag.label }} {{ form.na_tag() }}</p>
@@ -37,7 +38,8 @@
                 </form>
             </div>
             <div id="right" style="flex: 1 1 0">
-                <div id="rendered-showdown-output"></div>
+                <div class="rendered-showdown-output" id="rendered-showdown-body"></div>
+                <div class="rendered-showdown-output" id="rendered-showdown-citation"></div>
             </div>
         </div>
     </body>

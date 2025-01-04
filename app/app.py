@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv, dotenv_values
 import bcrypt
 from random import choices, randint
+import json
 
 app = Flask(__name__)
 
@@ -90,6 +91,8 @@ class Article:
 	cover_image_alt_text: str
 	# source text under image
 	cover_image_source: str
+	# citation at bottom of page, has different format when viewing article page
+	citation: str
 	# content of the article formatted with html tags
 	body: str
 
@@ -139,15 +142,15 @@ def load_user(user_id):
 
 
 def load_article(article_id: str) -> (Article, Exception):
-	article_path = "articles/" + article_id + ".txt"
+	article_path = f"articles/{article_id}.json"
+	ret = ''
 	try:
 		with open(article_path, 'r') as f:
-			lines = []
-			for i in range(9):
-				# [:-1] removes \n from end of line
-				lines.append(f.readline()[:-1])
-			# body can have newlines in it so we just read the rest of the file
-			lines.append(f.read())
+			try:
+				# return Article and no error if json is valid
+				return json.load(f, object_hook=lambda d: Article(**d)), None
+			except json.JSONDecodeError as err:
+				return None, err
 	except FileNotFoundError:
 		return None, FileNotFoundError
 
@@ -167,18 +170,17 @@ def load_article(article_id: str) -> (Article, Exception):
 
 
 def save_article(article: Article):
-	article_path = "articles/" + article.article_id + ".txt"
+	article_path = f"articles/{article.article_id}.json"
 	with open(article_path, 'w') as f:
-		file_content = article.title + "\n" + article.author + "\n" + article.article_id + "\n"
-		file_content += str(article.creation_date_epoch) + "\n" + str(article.edit_date_epoch) + "\n" + " ".join(
-			article.tags)
-		file_content += "\n" + article.cover_image_name + "\n" + article.cover_image_alt_text + "\n"
-		file_content += article.cover_image_source + "\n" + article.body
-		f.write(file_content)
+		# file_content = article.title + "\n" + article.author + "\n" + article.article_id + "\n"
+		# file_content += str(article.creation_date_epoch) + "\n" + str(article.edit_date_epoch) + "\n" + " ".join(
+		# 	article.tags)
+		# file_content += "\n" + article.cover_image_name + "\n" + article.cover_image_alt_text + "\n"
+		# file_content += article.cover_image_source + "\n" + article.body
+		f.write(json.dumps(article.__dict__, indent=4))
 
 
-def get_article_creation_date_str(article):
-	# return "abc"
+def get_article_creation_date_str(article: Article):
 	dt = datetime.fromtimestamp(int(article.creation_date_epoch))
 	ret = dt.strftime("%B %d, %Y")
 	return ret
@@ -200,11 +202,11 @@ def get_all_articles():
 	# traverse through all articles and add them to article_list
 	for filename in os.listdir("articles/"):
 		full_filename = os.path.join("articles/", filename)
-		# only add to article list if it is a file that ends in .txt
-		if os.path.isfile(full_filename) and full_filename[-len(".txt"):] == ".txt":
-			art, err = load_article(filename[:-len(".txt")])
+		# only add to article list if it is a file that ends in .json
+		if os.path.isfile(full_filename) and full_filename[-len(".json"):] == ".json":
+			art, err = load_article(filename[:-len(".json")])
 			if err:
-				print("error loading article", filename[:-len(".txt")], "with path", full_filename)
+				print("error loading article", filename[:-len(".json")], "with path", full_filename)
 			else:
 				article_list.append(art)
 	# sort article_list in descending order so that most recent articles are towards front of list
@@ -244,7 +246,7 @@ def articles(article_id):
 @app.route("/section/<url_tag>", methods=['GET'])
 def section(url_tag):
 	# format for each section:
-	# 	url path: [abbreviation in article txt files, display name]
+	# 	url path: [abbreviation in article json files, display name]
 	sections_dict = {
 		"north_america": ["na", "North America"],
 		"europe": ["eu", "Europe"],
@@ -267,9 +269,9 @@ def section(url_tag):
 		full_filename = os.path.join("articles/", filename)
 		# only add to article list if it is a file
 		if os.path.isfile(full_filename):
-			art, err = load_article(filename[:-len(".txt")])
+			art, err = load_article(filename[:-len(".json")])
 			if err:
-				print("error loading article", filename[:-len(".txt")], "with path ", full_filename)
+				print("error loading article", filename[:-len(".json")], "with path ", full_filename)
 			elif section_tag in art.tags:
 				# only include articles with specified section tag
 				section_article_list.append(art)
@@ -306,8 +308,7 @@ def edit(article_id=None):
 		author = form.author.data
 		# only update creation date if we are creating a new article
 		# if editing an existing article keep date the same
-		print(f'articles/{article_id}.txt')
-		if os.path.isfile(f'articles/{article_id}.txt'):
+		if os.path.isfile(f'articles/{article_id}.json'):
 			art, _ = load_article(article_id)
 			print("art:", art)
 			creation_date_epoch = art.creation_date_epoch
@@ -330,6 +331,7 @@ def edit(article_id=None):
 
 		cover_image_alt_text = form.cover_image_alt_text.data
 		cover_image_source = form.cover_image_source.data
+		citation = form.citation.data
 		tags_data = [form.na_tag.data, form.sa_tag.data, form.eu_tag.data, form.af_tag.data, form.as_tag.data,
 		             form.oc_tag.data]
 		tags = []
@@ -347,18 +349,18 @@ def edit(article_id=None):
 			tags.append("oc")
 		article = Article(title=title, author=author, article_id=article_id, creation_date_epoch=creation_date_epoch,
 		                  edit_date_epoch=edit_date_epoch, tags=tags, cover_image_name=cover_image_name,
-		                  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source, body=body)
+		                  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source,
+		                  citation=citation, body=body)
 		save_article(article)
 		return redirect(url_for("articles", article_id=article.article_id))
 	article = None
-	if article_id is None or not os.path.isfile("articles/" + str(article_id) + ".txt"):
+	if article_id is None or not os.path.isfile(f"articles/{str(article_id)}.json"):
 		# article_id is None -> called /edit/ (new article)
-		# not os.path.isfile("articles/" + article_id + ".txt") -> called /edit/<article_id> on nonexistent article_id
+		# not os.path.isfile(f"articles/{article_id}.json") -> called /edit/<article_id> on nonexistent article_id
 		article_id = str(randint(0, 2 ** 31))
 	else:
 		# article already exists (editing existing article) -> populate form
 		article, _ = load_article(article_id)
-		article.body = article.body.replace("\n<br>\n<br>\n", "\n\n")
 
 		form = ArticleForm(obj=article)
 		form.na_tag.data = "na" in article.tags

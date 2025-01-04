@@ -7,12 +7,17 @@ input  { display: table-cell; margin: 0 0.5rem;}
     margin-left: 1.25rem;
 }
 
-#rendered-showdown-output {
+.rendered-showdown-output {
 	/* same width and font size as an actual article */
 	width: 40rem;
 	font-size: 1.25em;
 }
 
-#rendered-showdown-output p {
+#rendered-showdown-citation p {
     margin-bottom: 1rem;
+}
+
+#rendered-showdown-citation {
+    padding-left: 1.5em;
+    text-indent:-1.5em;
 }
