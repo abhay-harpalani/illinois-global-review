@@ -59,10 +59,7 @@ class ArticleForm(FlaskForm):
 	title = StringField('Title', validators=[DataRequired()])
 	author = StringField('Author', validators=[DataRequired()])
 	body = TextAreaField('Body', validators=[DataRequired()])
-	cover_image = FileField(
-		'Cover Image',
-		validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
-	)
+	cover_image = FileField('Cover Image')
 	cover_image_alt_text = StringField('Cover Image Alt Text', validators=[DataRequired()])
 	cover_image_source = StringField('Cover Image Source', validators=[DataRequired()])
 	# not required, it may be possible for an article to not need citations
@@ -310,13 +307,20 @@ def edit(article_id=None):
 
 		# handle cover image
 		cover_image = form.cover_image.data
-		_, file_extension = os.path.splitext(cover_image.filename)
-		unique_filename = article_id + file_extension
-		cover_image_name = os.path.join("static/article_img", unique_filename)
-		if os.path.exists(cover_image_name):
-			os.remove(cover_image_name)
-		cover_image.save(cover_image_name)  # save uploaded image
-		cover_image_name = "/" + cover_image_name
+		if cover_image:
+			# this is a new article or we are editing the image in an existing article
+			_, file_extension = os.path.splitext(cover_image.filename)
+			unique_filename = article_id + file_extension
+			cover_image_name = os.path.join("static/article_img", unique_filename)
+			if os.path.exists(cover_image_name):
+				os.remove(cover_image_name)
+			cover_image.save(cover_image_name)  # save uploaded image
+			cover_image_name = "/" + cover_image_name
+		else:
+			# this is an existing article and the image is not being edited
+			# keep cover_image_name the same
+			temp, _ = load_article(article_id)
+			cover_image_name = temp.cover_image_name
 
 		cover_image_alt_text = form.cover_image_alt_text.data
 		cover_image_source = form.cover_image_source.data
@@ -347,11 +351,13 @@ def edit(article_id=None):
 		# article_id is None -> called /edit/ (new article)
 		# not os.path.isfile(f"articles/{article_id}.json") -> called /edit/<article_id> on nonexistent article_id
 		article_id = str(randint(0, 2 ** 31))
+		form.cover_image.validators = [FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
 	else:
 		# article already exists (editing existing article) -> populate form
 		article, _ = load_article(article_id)
 
 		form = ArticleForm(obj=article)
+		form.cover_image.validators = [FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
 		form.na_tag.data = "na" in article.tags
 		form.sa_tag.data = "sa" in article.tags
 		form.eu_tag.data = "eu" in article.tags
