@@ -52,6 +52,11 @@
   margin-bottom: 1rem;
 }
 
+#rendered-showdown-citation {
+    padding-left: 1.5em;
+    text-indent:-1.5em;
+}
+
 /* adjust styles on screens < 800 px wide */
 @media screen and (max-width: 800px) {
   .article-text-wrapper {
