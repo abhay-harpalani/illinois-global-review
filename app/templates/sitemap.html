@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9/">
+    {% for url in sitemap_urls %}
+        <url>
+            <loc>{{ url.loc }}</loc>
+            <lastmod>{{ url.lastmod }}</lastmod>
+            <changefreq>monthly</changefreq>
+            <priority>1.0</priority>
+        </url>
+    {% endfor %}
+</urlset>
