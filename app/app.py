@@ -2,14 +2,13 @@ import time
 from datetime import datetime
 import os
 import os.path
-from flask import Flask, redirect, url_for, render_template, flash, request, send_file
+from flask import Flask, redirect, url_for, render_template, flash, request, send_file, make_response
 from flask_login import LoginManager, login_user, logout_user, current_user
 from jinja2 import TemplateError
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import BooleanField, StringField, PasswordField, TextAreaField
 from wtforms.validators import DataRequired, EqualTo, Length
-from werkzeug.utils import secure_filename
 from typing import List
 from dataclasses import dataclass
 from dotenv import load_dotenv, dotenv_values
@@ -121,7 +120,12 @@ class User:
 		return self.username
 
 
-""" helper functions """
+@dataclass
+class SitemapURL:
+	loc: str
+	lastmod: str
+
+''' helper functions '''
 
 
 @login_manager.user_loader
@@ -446,7 +450,30 @@ def dashboard():
 	return render_template("dashboard.html", article_list=get_all_articles(), current_user=current_user)
 
 
-@app.route("/")
+@app.route('/robots.txt', methods=['GET'])
+def robots():
+	return send_file('static/txt/robots.txt')
+
+@app.route('/sitemap.xml', methods=['GET'])
+def sitemap():
+	sitemap_urls = []
+	all_articles = get_all_articles()
+
+	# base_url will be 'https://globalreview.web.illinois.edu/' on main site
+	base_url = request.url_root
+	for art in all_articles:
+		art_loc = base_url + art.article_id
+		# formatted as YYYY-MM-DD, for example 2024-12-31
+		art_last_mod = time.strftime('%Y-%m-%d')
+		obj = SitemapURL(loc=art_loc, lastmod=art_last_mod)
+		sitemap_urls.append(obj)
+
+	template = render_template('sitemap.html', sitemap_urls=sitemap_urls)
+	response = make_response(template)
+	response.headers['Content-Type'] = 'application/xml'
+	return response
+
+@app.route('/')
 def index_handler():
 	return render_template("index.html", title="Home")
 
