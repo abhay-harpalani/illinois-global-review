@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://globalreview.web.illinois.edu/
+Sitemap: https://globalreview.web.illinois.edu/sitemap.xml
