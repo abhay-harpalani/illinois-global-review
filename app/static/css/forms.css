@@ -1,8 +1,43 @@
-form  { display: table; margin: 0 1.25rem;}
-p     { display: table-row; }
-label { display: table-cell; margin: 0 0.5rem; }
-input { display: table-cell; margin: 0 0.5rem; }
+form   { display: table; margin: 0 1.25rem;}
+form p { display: table-row;}
+label  { display: table-cell; margin: 0 0.5rem;}
+input  { display: table-cell; margin: 0 0.5rem;}
 
 .form-header {
     margin-left: 1.25rem;
+}
+
+form fieldset {
+    width: 10rem;
+}
+
+.rendered-showdown-output {
+	/* same width and font size as an actual article */
+	width: 40rem;
+	font-size: 1.25em;
+}
+
+.rendered-showdown-output p {
+    margin-bottom: 1rem;
+}
+
+.rendered-showdown-output a {
+  text-decoration: underline;
+}
+
+.rendered-showdown-output a:link {
+  color: #0000EE;
+}
+
+.rendered-showdown-output a:visited {
+  color: #551A8B;
+}
+
+.rendered-showdown-output a:active {
+  color: #FF0000;
+}
+
+#rendered-showdown-citation {
+    padding-left: 1.5em;
+    text-indent:-1.5em;
 }

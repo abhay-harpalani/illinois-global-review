@@ -27,24 +27,34 @@
   background-repeat: no-repeat;
 }
 
-.image-source a {
+.article-content a, .image-source a {
   text-decoration: underline;
 }
-.image-source a:link {
+
+.article-content a:link, .image-source a:link {
   color: #0000EE;
 }
 
-.image-source a:visited {
+.article-content a:visited, .image-source a:visited {
   color: #551A8B;
 }
 
-.image-source a:active {
+.article-content a:active, .image-source a:active {
   color: #FF0000;
 }
 
 .article-content {
   width: 40rem;
   margin: 3rem auto 0;
+}
+
+.article-content p {
+  margin-bottom: 1rem;
+}
+
+#rendered-showdown-citation {
+    padding-left: 1.5em;
+    text-indent:-1.5em;
 }
 
 /* adjust styles on screens < 800 px wide */

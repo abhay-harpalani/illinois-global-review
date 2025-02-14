@@ -18,8 +18,10 @@
         <a href="{{ article.cover_image_source }}"><p>Image Source</p></a>
     </div>
     <div class="article-content font-size-article-content">
-        <p>{{ article.body|safe }}</p>
-        <br>
+        <div>{{ article.body|safe }}</div>
+        <div id="rendered-showdown-citation">
+            {{ article.citation|safe }}
+        </div>
         <p>
             Disclaimer: This article and its contents are in no way representative
             of the positions of the University of Illinois Urbana-Champaign or
