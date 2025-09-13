@@ -1,5 +1,4 @@
 import random
-import os
 
 
 # makes one-time passcode which can be used to make a single account
@@ -11,5 +10,5 @@ def make_otp(path_to_otp_list='new_user_otp_list.txt'):
 		return new_otp
 
 
-if __name__ == '__main':
+if __name__ == '__main__':
 	make_otp()
