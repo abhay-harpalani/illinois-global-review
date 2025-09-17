@@ -11,4 +11,8 @@ def make_otp(path_to_otp_list='new_user_otp_list.txt'):
 
 
 if __name__ == '__main__':
+<<<<<<< Updated upstream
 	make_otp()
+=======
+	print(make_otp())
+>>>>>>> Stashed changes
