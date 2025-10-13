@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% set css_imports = ['<link rel="stylesheet" href="/static/css/about_us.css">'] %}
+{% block content %}
+    <div class="about-us-main font-size-card-big-subtitle">
+        {% for _ in range(2) %}
+            <div class="about-us-entry">
+                <div class="about-us-img-wrapper">
+                    <img src="/static/img/placeholder.png" class="about-us-img" alt="placeholder image">
+                </div>
+                <p class="about-us-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam scelerisque lacinia lacinia.
+                    Morbi aliquam erat varius massa malesuada, nec feugiat dolor finibus. Sed posuere tristique enim
+                    eget tincidunt. Duis finibus eros felis, et vehicula nisi euismod scelerisque. Pellentesque a enim
+                    neque. Nulla eget ultrices enim, a bibendum mauris. Nulla sit amet mattis ex, non mollis eros.
+                    Maecenas vel fringilla velit. Nam bibendum turpis vel rhoncus blandit. Fusce id metus scelerisque,
+                    elementum ante eget, aliquet sem. Curabitur ac tellus ac lorem bibendum tincidunt lobortis et felis.
+                    Pellentesque in porttitor ipsum, non elementum neque
+                </p>
+            </div>
+            <div class="about-us-entry">
+                <p class="about-us-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam scelerisque lacinia lacinia.
+                    Morbi aliquam erat varius massa malesuada, nec feugiat dolor finibus. Sed posuere tristique enim
+                    eget tincidunt. Duis finibus eros felis, et vehicula nisi euismod scelerisque. Pellentesque a enim
+                    neque. Nulla eget ultrices enim, a bibendum mauris. Nulla sit amet mattis ex, non mollis eros.
+                    Maecenas vel fringilla velit. Nam bibendum turpis vel rhoncus blandit. Fusce id metus scelerisque,
+                    elementum ante eget, aliquet sem. Curabitur ac tellus ac lorem bibendum tincidunt lobortis et felis.
+                    Pellentesque in porttitor ipsum, non elementum neque
+                </p>
+                <div class="about-us-img-wrapper">
+                    <img src="/static/img/placeholder.png" class="about-us-img">
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

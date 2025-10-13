@@ -1,0 +1,22 @@
+
+.about-us-main {
+    margin: 1rem 7rem;
+}
+
+.about-us-entry {
+    display: flex
+}
+
+.about-us-img-wrapper {
+    height: 15rem;
+    margin: 1rem
+}
+.about-us-img {
+    flex: 1;
+    height: 100%;
+    width: auto;
+}
+
+.about-us-text {
+    margin: 1rem;
+}

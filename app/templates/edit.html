@@ -18,15 +18,8 @@
                     <p>{{ form.cover_image_alt_text.label }} {{ form.cover_image_alt_text(size=32) }}</p>
                     <p>{{ form.cover_image_source.label }} {{ form.cover_image_source(size=32) }}</p>
                     <p>{{ form.citation.label }} {{ form.citation(rows=1, cols=80) }}</p>
-                    <fieldset>
-                        <legend>Continent Tags</legend>
-                        <p>{{ form.na_tag.label }} {{ form.na_tag() }}</p>
-                        <p>{{ form.sa_tag.label }} {{ form.sa_tag() }}</p>
-                        <p>{{ form.eu_tag.label }} {{ form.eu_tag() }}</p>
-                        <p>{{ form.af_tag.label }} {{ form.af_tag() }}</p>
-                        <p>{{ form.as_tag.label }} {{ form.as_tag() }}</p>
-                        <p>{{ form.oc_tag.label }} {{ form.oc_tag() }}</p>
-                    </fieldset>
+                    <legend>Tags</legend>
+                    <p>{{ form.article_tags.label }} {{ form.article_tags(size=6) }}</p>
                     {% with messages = get_flashed_messages() %}
                         <ul class="errors">
                         {% for error in messages %}

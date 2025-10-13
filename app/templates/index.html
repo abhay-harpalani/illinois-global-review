@@ -2,47 +2,67 @@
 
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-<div class="card-big-wrapper">
-    {% for article in articles_big_card %}
-        <a href="/articles/{{ article.article_id }}.html">
+    <div class="card-big-wrapper">
+        {% for article in articles_big_card %}
             <div class="card-big">
                 <div class="card-big-text-wrapper">
-                    <h2 class="font-size-card-big-title">{{ article.title }}</h2>
-                    <h3 class="card-big-subtitle font-size-card-big-subtitle">
-                        By {{ article.author }}
-                        <br>
-                        {{ get_article_creation_date_str(article) }}
-                    </h3>
+                    <a href="/articles/{{ article.article_id }}.html">
+                        <h2 class="font-size-card-big-title">{{ article.title }}</h2>
+                        <a href="/articles/{{ article.article_id }}.html">
+                            <h3 class="card-big-subtitle font-size-card-big-subtitle">
+                                By {{ article.author }}
+                                <br>
+                                {{ get_article_creation_date_str(article) }}
+                            </h3>
+                        </a>
+                        {% if article.tags %}
+                            <div class="card-tags-wrapper">
+                                {% for t in article.tags %}
+                                    <a class="card-tag" href="/tags/{{ t }}">{{ url_to_tag_dict[t] }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </a>
                 </div>
                 <div class="card-big-image-wrapper">
-                    <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">
+                    <a href="/articles/{{ article.article_id }}.html">
+                        <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">
+                    </a>
                 </div>
             </div>
-        </a>
-        <hr>
-    {% endfor %}
-</div>
-<div class="card-small-wrapper">
-    {% for article_row in articles_small_card %}
-        <div class="card-small-row">
-        {% for article in article_row %}
-            <a href="/articles/{{ article.article_id }}.html">
-                <div class="card-small">
-                    <div class="card-small-image-wrapper">
-                        <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">
-                    </div>
-                    <div class="card-small-text-wrapper">
-                        <h2 class="font-size-card-small-title">{{ article.title }}</h2>
-                        <h3 class="card-small-subtitle font-size-card-small-subtitle">
-                            By {{ article.author }}
-                            <br>
-                            {{ get_article_creation_date_str(article) }}
-                        </h3>
-                    </div>
-                </div>
-            </a>
+            <hr>
         {% endfor %}
-        </div>
-    {% endfor %}
-</div>
+    </div>
+    <div class="card-small-wrapper">
+        {% for article_row in articles_small_card %}
+            <div class="card-small-row">
+                {% for article in article_row %}
+                    <div class="card-small">
+                        <div class="card-small-image-wrapper">
+                            <a href="/articles/{{ article.article_id }}.html">
+                                <img src="{{ article.cover_image_name }}" alt="{{ article.cover_image_alt_text }}">
+                            </a>
+                        </div>
+                        <a href="/articles/{{ article.article_id }}.html">
+                            <div class="card-small-text-wrapper">
+                                <h2 class="font-size-card-small-title">{{ article.title }}</h2>
+                                <h3 class="card-small-subtitle font-size-card-small-subtitle">
+                                    By {{ article.author }}
+                                    <br>
+                                    {{ get_article_creation_date_str(article) }}
+                                </h3>
+                            </div>
+                        </a>
+                        {% if article.tags %}
+                            <div class="card-tags-wrapper">
+                                {% for t in article.tags %}
+                                    <a class="card-tag" href="/tags/{{ t }}">{{ url_to_tag_dict[t] }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

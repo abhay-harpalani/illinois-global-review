@@ -3,7 +3,7 @@
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
 <div class="card-small-wrapper">
-    {% for article_row in section_articles %}
+    {% for article_row in tagged_articles %}
         <div class="card-small-row">
         {% for article in article_row %}
             <a href="/articles/{{ article.article_id }}.html">

@@ -7,9 +7,9 @@ from flask_login import LoginManager, login_user, logout_user, current_user
 from jinja2 import TemplateError
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import BooleanField, StringField, PasswordField, TextAreaField
+from wtforms import BooleanField, StringField, PasswordField, TextAreaField, SelectMultipleField
 from wtforms.validators import DataRequired, EqualTo, Length
-from typing import List
+from typing import List, Any
 from dataclasses import dataclass
 from dotenv import load_dotenv, dotenv_values
 import bcrypt
@@ -31,6 +31,17 @@ try:
 except FileExistsError:
 	pass
 load_dotenv()
+
+if not os.path.exists('app_files/tags.json'):
+	print('tags.json file not present')
+	exit(1)
+# keys are url subpaths and values are formatted tags names (e.g. north_america: North America)
+url_to_tag_dict = None
+# load tags from json file
+with open('app_files/tags.json', 'r') as f:
+	data = json.load(f)
+	assert isinstance(data, dict)
+	url_to_tag_dict = data
 
 app.secret_key = dotenv_values('.env')['SECRET']
 login_manager = LoginManager()
@@ -63,14 +74,10 @@ class ArticleForm(FlaskForm):
 	cover_image_source = StringField('Cover Image Source', validators=[DataRequired()])
 	# not required, it may be possible for an article to not need citations
 	citation = TextAreaField('Citation')
-	# each tag needs its own checkbox
-	# tags are stored in Article class as a list of strings
-	na_tag = BooleanField('North America')
-	sa_tag = BooleanField('South America')
-	eu_tag = BooleanField('Europe')
-	af_tag = BooleanField('Africa')
-	as_tag = BooleanField('Asia')
-	oc_tag = BooleanField('Oceania')
+
+	# convert dict to list of tuples
+	choices = [(k, v) for k, v in url_to_tag_dict.items()]
+	article_tags = SelectMultipleField('Select any relevant tags:', choices=choices)
 
 
 @dataclass
@@ -107,6 +114,7 @@ class User:
 	hashed_password: str
 	email: str
 
+	''' these 4 methods are needed for the login manager '''
 	def is_authenticated(self) -> bool:
 		return True
 
@@ -120,25 +128,27 @@ class User:
 		return self.username
 
 
+# used for sitemap.xml
 @dataclass
 class SitemapURL:
 	loc: str
 	lastmod: str
 
+
 ''' helper functions '''
 
 
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(user_id: str) -> User | None:
 	try:
 		with open(f'users/{user_id}.txt', 'r') as f:
 			user_file = f.read()
 	except FileNotFoundError:
-		print('could not find user with id:', user_id)
+		print(f'load_user({user_id}): could not find user')
 		return None
 	user_lines = user_file.split('\n')
 	if len(user_lines) != 4:
-		print(f'users/{user_id}.txt', 'does not have exactly 4 lines (username, hashed_password, name, email)')
+		print(f'load_user({user_id}): file does not have exactly 4 lines (username, hashed_password, name, email)')
 		return None
 	username = user_lines[0]
 	hashed_password = user_lines[1]
@@ -147,32 +157,30 @@ def load_user(user_id):
 	return User(username=username, hashed_password=hashed_password, email=email, name=name)
 
 
-def load_article(article_id: str) -> (Article, Exception):
+# returns Article object with the given id if found
+# otherwise returns None if an error was encountered
+def load_article(article_id: str) -> Any | None:
 	article_path = f'articles/{article_id}.json'
-	ret = ''
 	try:
 		with open(article_path, 'r') as f:
 			try:
 				# return Article and no error if json is valid
-				return json.load(f, object_hook=lambda d: Article(**d)), None
+				return json.load(f, object_hook=lambda d: Article(**d))
 			except json.JSONDecodeError as err:
-				return None, err
+				print(f'load_article: json decode error for id {article_id}')
+				return None
 	except FileNotFoundError:
-		return None, FileNotFoundError
+		print(f'load_article: file not found error for id {article_id}')
+		return None
 
 
-def save_article(article: Article):
+def save_article(article: Article) -> None:
 	article_path = f'articles/{article.article_id}.json'
 	with open(article_path, 'w') as f:
-		# file_content = article.title + '\n' + article.author + '\n' + article.article_id + '\n'
-		# file_content += str(article.creation_date_epoch) + '\n' + str(article.edit_date_epoch) + '\n' + ' '.join(
-		# 	article.tags)
-		# file_content += '\n' + article.cover_image_name + '\n' + article.cover_image_alt_text + '\n'
-		# file_content += article.cover_image_source + '\n' + article.body
 		f.write(json.dumps(article.__dict__, indent=4))
 
 
-def get_article_creation_date_str(article: Article):
+def get_article_creation_date_str(article: Article) -> str:
 	dt = datetime.fromtimestamp(int(article.creation_date_epoch))
 	ret = dt.strftime('%B %d, %Y')
 	return ret
@@ -189,19 +197,19 @@ def hash_password(password: str) -> str:
 	return pw.decode('utf-8')
 
 
-def get_all_articles():
+def get_all_articles() -> List[Article]:
 	article_list = []
 	# traverse through all articles and add them to article_list
 	for filename in os.listdir('articles/'):
 		full_filename = os.path.join('articles/', filename)
 		# only add to article list if it is a file that ends in .json
 		if os.path.isfile(full_filename) and full_filename[-len('.json'):] == '.json':
-			art, err = load_article(filename[:-len('.json')])
-			if err:
-				print('error loading article', filename[:-len('.json')], 'with path', full_filename)
-			else:
-				article_list.append(art)
-	# sort article_list in descending order so that most recent articles are towards front of list
+			art = load_article(filename[:-len('.json')])
+			if art is None:
+				print(f'get_all_articles: error loading article {filename} with path {full_filename}')
+				continue
+			article_list.append(art)
+	# sort article_list in descending order so that most recent articles are towards the top of the page
 	article_list.sort(key=lambda article: article.creation_date_epoch, reverse=True)
 	return article_list
 
@@ -219,14 +227,15 @@ def index():
 	# articles_small_card is a list of lists, where each inner element is a row of Article objects to be displayed
 	articles_small_card = [article_list[i:i + 3] for i in range(2, min(17, len(article_list)), 3)]
 	return render_template('index.html', title='Home', articles_big_card=articles_big_card,
-	                       articles_small_card=articles_small_card, current_user=current_user)
+	                       articles_small_card=articles_small_card, url_to_tag_dict=url_to_tag_dict,
+	                       current_user=current_user)
 
 
 @app.route('/articles/<article_id>.html', methods=['GET'])
-def articles(article_id):
+def articles(article_id: str):
 	# load article and redirect to edit page if it does not exist
-	article, err = load_article(article_id)
-	if err:
+	article = load_article(article_id)
+	if article is None:
 		if current_user.is_authenticated:
 			return redirect(url_for('edit', article_id=article_id))
 		else:
@@ -234,50 +243,38 @@ def articles(article_id):
 	return render_template('article.html', title=article.title, article=article, current_user=current_user)
 
 
-# sections for continents (north america, south america, asia, etc.)
-@app.route('/section/<url_tag>', methods=['GET'])
-def section(url_tag):
-	# format for each section:
-	# 	url path: [abbreviation in article json files, display name]
-	sections_dict = {
-		'north_america': ['na', 'North America'],
-		'europe': ['eu', 'Europe'],
-		'asia': ['as', 'Asia'],
-		'africa': ['af', 'Africa'],
-		'south_america': ['sa', 'South America'],
-		'oceania': ['oc', 'Oceania'],
-	}
-
-	# get requested section as a string
-	try:
-		section_tag = sections_dict[url_tag][0]
-		section_name = sections_dict[url_tag][1]
-	except KeyError:
+# tagged articles
+# includes continents (north america, south america, asia, etc.) and topics (international relations, wildlife, etc.)
+@app.route('/tags/<requested_tag>', methods=['GET'])
+def tags(requested_tag: str):
+	# get requested tag as formatted string
+	# for example 'North America' rather than 'north_america'
+	if requested_tag not in url_to_tag_dict:
 		print('error: section not found')
 		return redirect('/')
+	formatted_tag = url_to_tag_dict[requested_tag]
 
-	section_article_list = []
+	tagged_article_list = []
 	for filename in os.listdir('articles/'):
 		full_filename = os.path.join('articles/', filename)
 		# only add to article list if it is a file
 		if os.path.isfile(full_filename):
-			art, err = load_article(filename[:-len('.json')])
-			if err:
-				print('error loading article', filename[:-len('.json')], 'with path ', full_filename)
-			elif section_tag in art.tags:
-				# only include articles with specified section tag
-				section_article_list.append(art)
-	# sort section_article_list in descending order so that most recent articles are towards front of list
-	section_article_list.sort(key=lambda article: article.creation_date_epoch, reverse=True)
+			art = load_article(filename[:-len('.json')])
+			if art is None:
+				print(f'tag({requested_tag}): error loading article {filename} with path {full_filename}')
+				continue
+			# only include articles with specified tag
+			if requested_tag in art.tags:
+				tagged_article_list.append(art)
+	# sort tagged_article_list in descending order so that the most recent articles are towards front of list
+	tagged_article_list.sort(key=lambda article: article.creation_date_epoch, reverse=True)
 
-	# articles_small_card is a list of lists, where each inner element is a row of Article objects to be displayed
-	# display all section articles on this page
-	section_articles = [section_article_list[i:i + 3] for i in range(0, len(section_article_list), 3)]
+	tagged_articles = [tagged_article_list[i:i + 3] for i in range(0, len(tagged_article_list), 3)]
 	try:
-		return render_template('section.html', title=section_name, section_articles=section_articles,
+		return render_template('tag.html', title=formatted_tag, tagged_articles=tagged_articles,
 		                       current_user=current_user)
 	except TemplateError:
-		print('error rendering section', section_name)
+		print('error rendering section', requested_tag)
 		return redirect('/')
 
 
@@ -289,7 +286,7 @@ def directory():
 
 @app.route('/edit/<article_id>.html', methods=['GET', 'POST'])
 @app.route('/edit/', methods=['GET', 'POST'])
-def edit(article_id=None):
+def edit(article_id: str = None):
 	if not current_user.is_authenticated:
 		return render_template('403.html', current_user=current_user)
 	form = ArticleForm()
@@ -301,7 +298,7 @@ def edit(article_id=None):
 		# only update creation date if we are creating a new article
 		# if editing an existing article keep date the same
 		if os.path.isfile(f'articles/{article_id}.json'):
-			art, _ = load_article(article_id)
+			art = load_article(article_id)
 			creation_date_epoch = art.creation_date_epoch
 		else:
 			creation_date_epoch = str(int(time.time()))
@@ -323,27 +320,13 @@ def edit(article_id=None):
 		else:
 			# this is an existing article and the image is not being edited
 			# keep cover_image_name the same
-			temp, _ = load_article(article_id)
+			temp = load_article(article_id)
 			cover_image_name = temp.cover_image_name
 
 		cover_image_alt_text = form.cover_image_alt_text.data
 		cover_image_source = form.cover_image_source.data
 		citation = form.citation.data
-		tags_data = [form.na_tag.data, form.sa_tag.data, form.eu_tag.data, form.af_tag.data, form.as_tag.data,
-		             form.oc_tag.data]
-		tags = []
-		if tags_data[0]:
-			tags.append('na')
-		if tags_data[1]:
-			tags.append('sa')
-		if tags_data[2]:
-			tags.append('eu')
-		if tags_data[3]:
-			tags.append('af')
-		if tags_data[4]:
-			tags.append('as')
-		if tags_data[5]:
-			tags.append('oc')
+		tags = form.article_tags.data
 		article = Article(title=title, author=author, article_id=article_id, creation_date_epoch=creation_date_epoch,
 		                  edit_date_epoch=edit_date_epoch, tags=tags, cover_image_name=cover_image_name,
 		                  cover_image_alt_text=cover_image_alt_text, cover_image_source=cover_image_source,
@@ -355,19 +338,15 @@ def edit(article_id=None):
 		# article_id is None -> called /edit/ (new article)
 		# not os.path.isfile(f'articles/{article_id}.json') -> called /edit/<article_id> on nonexistent article_id
 		article_id = str(randint(0, 2 ** 31))
-		form.cover_image.validators = [FileRequired(), FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
+		form.cover_image.validators = [FileRequired(),
+		                               FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
 	else:
 		# article already exists (editing existing article) -> populate form
-		article, _ = load_article(article_id)
+		article = load_article(article_id)
 
 		form = ArticleForm(obj=article)
 		form.cover_image.validators = [FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Please upload a jpg or png file')]
-		form.na_tag.data = 'na' in article.tags
-		form.sa_tag.data = 'sa' in article.tags
-		form.eu_tag.data = 'eu' in article.tags
-		form.af_tag.data = 'af' in article.tags
-		form.as_tag.data = 'as' in article.tags
-		form.oc_tag.data = 'oc' in article.tags
+		form.article_tags.data = article.tags
 	return render_template('edit.html', form=form, article=article, article_id=article_id, current_user=current_user)
 
 
@@ -449,10 +428,15 @@ def dashboard():
 		return render_template('403.html', current_user=current_user)
 	return render_template('dashboard.html', article_list=get_all_articles(), current_user=current_user)
 
+@app.route('/about-us/', methods=['GET'])
+def about_us():
+	return render_template('about-us.html', title='About Us')
+
 
 @app.route('/robots.txt', methods=['GET'])
 def robots():
 	return send_file('static/txt/robots.txt')
+
 
 @app.route('/sitemap.xml', methods=['GET'])
 def sitemap():
@@ -473,10 +457,12 @@ def sitemap():
 	response.headers['Content-Type'] = 'application/xml'
 	return response
 
+
 @app.route('/')
 def index_handler():
 	return render_template('index.html', title='Home')
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', debug=False)
+	print(url_to_tag_dict)
+	app.run(host='0.0.0.0', port=5002, debug=True)

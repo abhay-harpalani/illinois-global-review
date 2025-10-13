@@ -133,7 +133,7 @@ h4 {
 	display: flex;
 	flex-direction: row;
 }
-	
+
 .card-big-text-wrapper {
 	flex: 1;
 	margin: 0.5rem;
@@ -186,6 +186,21 @@ h4 {
 	color: var(--igr-gray);
 }
 
+.card-tags-wrapper {
+    margin: 0.4rem 0;
+}
+
+.card-tag {
+    margin: 0 0.2rem;
+    padding: 0.35rem;
+    text-align: center;
+    border-radius: 9999rem;
+    background-color: var(--igr-gray);
+    color: white;
+    width: fit-content;
+    height: fit-content;
+}
+
 footer {
 	height: fit-content;
 	margin-top: 1rem;
@@ -230,7 +245,7 @@ footer {
 	.font-size-footer {
 		font-size: 1rem;
 	}
-	
+
 	.card-small-row {
 		gap: 1rem;
 	}
