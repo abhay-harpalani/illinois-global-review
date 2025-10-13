@@ -7,5 +7,9 @@
   "oceania": "Oceania",
   "wildlife": "Wildlife",
   "security": "Security",
-  "international_relations": "International Relations"
+  "international_relations": "International Relations",
+  "environment": "Environment",
+  "conflict_and_security":  "Conflict and Security",
+  "economics": "Economics",
+  "diplomacy":  "Diplomacy"
 }

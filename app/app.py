@@ -465,4 +465,4 @@ def index_handler():
 
 if __name__ == '__main__':
 	print(url_to_tag_dict)
-	app.run(host='0.0.0.0', port=5002, debug=True)
+	app.run(host='0.0.0.0', port=5002, debug=False)
