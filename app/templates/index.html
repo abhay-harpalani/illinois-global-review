@@ -56,7 +56,9 @@
                         {% if article.tags %}
                             <div class="card-tags-wrapper">
                                 {% for t in article.tags %}
-                                    <a class="card-tag" href="/tags/{{ t }}">{{ url_to_tag_dict[t] }}</a>
+                                    {% if t in url_to_tag_dict %}
+                                        <a class="card-tag" href="/tags/{{ t }}">{{ url_to_tag_dict[t] }}</a>
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                         {% endif %}

@@ -7,7 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user
 from jinja2 import TemplateError
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import BooleanField, StringField, PasswordField, TextAreaField, SelectMultipleField
+from wtforms import BooleanField, StringField, PasswordField, TextAreaField, SelectMultipleField, FieldList, FormField
 from wtforms.validators import DataRequired, EqualTo, Length
 from typing import List, Any
 from dataclasses import dataclass
@@ -42,6 +42,7 @@ with open('app_files/tags.json', 'r') as f:
 	data = json.load(f)
 	assert isinstance(data, dict)
 	url_to_tag_dict = data
+print(f'url_to_tag_dict: {url_to_tag_dict}')
 
 app.secret_key = dotenv_values('.env')['SECRET']
 login_manager = LoginManager()
@@ -76,8 +77,18 @@ class ArticleForm(FlaskForm):
 	citation = TextAreaField('Citation')
 
 	# convert dict to list of tuples
-	choices = [(k, v) for k, v in url_to_tag_dict.items()]
-	article_tags = SelectMultipleField('Select any relevant tags:', choices=choices)
+	article_tags = SelectMultipleField('Select any relevant tags:',
+	                                   choices=[(k, v) for k, v in url_to_tag_dict.items()])
+
+
+# updates the ArticleForm class, call this when url_to_tag_dict is updated
+def update_articleform_tag_choices():
+	ArticleForm.article_tags = SelectMultipleField('Select any relevant tags:',
+	                                               choices=[(k, v) for k, v in url_to_tag_dict.items()])
+
+
+class TagEditForm(FlaskForm):
+	new_tag = StringField('Tag Name', validators=[DataRequired()])
 
 
 @dataclass
@@ -115,6 +126,7 @@ class User:
 	email: str
 
 	''' these 4 methods are needed for the login manager '''
+
 	def is_authenticated(self) -> bool:
 		return True
 
@@ -278,6 +290,28 @@ def tags(requested_tag: str):
 		return redirect('/')
 
 
+@app.route('/edit_tags/', methods=['GET', 'POST'])
+def edit_tags(new_tag: str = None):
+	if not current_user.is_authenticated:
+		return render_template('403.html', current_user=current_user)
+	form = TagEditForm()
+	if form.validate_on_submit():
+		# edit tag list
+		global url_to_tag_dict
+		url_name = form.new_tag.data.lower().replace(' ', '_')
+		if url_name in url_to_tag_dict:
+			flash('That tag already exists, please pick a different one.', 'danger')
+		else:
+			url_to_tag_dict[url_name] = form.new_tag.data
+			update_articleform_tag_choices()
+
+			with open('app_files/tags.json', 'w') as f:
+				f.write(json.dumps(url_to_tag_dict, indent=4))
+			return redirect(url_for('dashboard'))
+	# serve form page
+	return render_template('edit_tags.html', form=form, current_user=current_user)
+
+
 @app.route('/directory/', methods=['GET'])
 def directory():
 	article_list = get_all_articles()
@@ -428,6 +462,7 @@ def dashboard():
 		return render_template('403.html', current_user=current_user)
 	return render_template('dashboard.html', article_list=get_all_articles(), current_user=current_user)
 
+
 @app.route('/about-us/', methods=['GET'])
 def about_us():
 	return render_template('about-us.html', title='About Us')
@@ -464,5 +499,4 @@ def index_handler():
 
 
 if __name__ == '__main__':
-	print(url_to_tag_dict)
-	app.run(host='0.0.0.0', port=5002, debug=False)
+	app.run(host='0.0.0.0', port=5010, debug=True)
