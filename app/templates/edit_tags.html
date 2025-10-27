@@ -1,0 +1,24 @@
+{% from "macros.html" import get_form_head %}
+<!DOCTYPE html>
+<html lang="en">
+{{ get_form_head("Edit Tags") }}
+<body>
+<h1 class="form-header left-aligned-text font-size-title">Editing Tags</h1>
+<div id="container" style="display: flex; flex-direction: row;">
+    <div id="left" style="flex: 1 1 0">
+        <form action="/edit_tags/" enctype="multipart/form-data" method="POST" id="edit-form">
+            {{ form.hidden_tag() }}
+            <p>{{ form.new_tag.label }} {{ form.new_tag(size=32) }}</p>
+            <button type="submit">Save</button>
+        </form>
+        {% with messages = get_flashed_messages() %}
+            <ul class="errors">
+                {% for error in messages %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endwith %}
+    </div>
+</div>
+</body>
+</html>
