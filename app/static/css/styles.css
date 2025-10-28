@@ -62,7 +62,7 @@ p, h3 {
 /* neue haas grotesk light */
 h4 {
 	font-family: neue-haas-grotesk-display, sans-serif;
-	font-weight: 400;
+	font-weight: 600;
 	font-style: normal;
 }
 
@@ -177,10 +177,10 @@ h4 {
 	background-repeat: no-repeat;
 }
 
-.card-small-row a {
-	flex: 1;
-	width: 100%;
-}
+/*.card-small-row a {*/
+/*	flex: 1;*/
+/*	width: 100%;*/
+/*}*/
 
 .card-small-subtitle {
 	color: var(--igr-gray);
@@ -188,10 +188,15 @@ h4 {
 
 .card-tags-wrapper {
     margin: 0.4rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
 }
 
 .card-tag {
-    margin: 0 0.2rem;
+    flex-shrink: 0;
+    flex-grow: 0;
+    margin: 0.2rem 0.2rem;
     padding: 0.35rem;
     text-align: center;
     border-radius: 9999rem;

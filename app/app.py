@@ -493,10 +493,5 @@ def sitemap():
 	return response
 
 
-@app.route('/')
-def index_handler():
-	return render_template('index.html', title='Home')
-
-
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=5002, debug=False)
