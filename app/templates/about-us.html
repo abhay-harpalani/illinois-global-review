@@ -4,35 +4,14 @@
 {% set css_imports = ['<link rel="stylesheet" href="/static/css/about_us.css">'] %}
 {% block content %}
     <div class="about-us-main font-size-card-big-subtitle">
-        {% for _ in range(2) %}
-            <div class="about-us-entry">
-                <div class="about-us-img-wrapper">
-                    <img src="/static/img/placeholder.png" class="about-us-img" alt="placeholder image">
-                </div>
-                <p class="about-us-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam scelerisque lacinia lacinia.
-                    Morbi aliquam erat varius massa malesuada, nec feugiat dolor finibus. Sed posuere tristique enim
-                    eget tincidunt. Duis finibus eros felis, et vehicula nisi euismod scelerisque. Pellentesque a enim
-                    neque. Nulla eget ultrices enim, a bibendum mauris. Nulla sit amet mattis ex, non mollis eros.
-                    Maecenas vel fringilla velit. Nam bibendum turpis vel rhoncus blandit. Fusce id metus scelerisque,
-                    elementum ante eget, aliquet sem. Curabitur ac tellus ac lorem bibendum tincidunt lobortis et felis.
-                    Pellentesque in porttitor ipsum, non elementum neque
-                </p>
+        <h4 class="font-size-title" style="text-align: center">About Us</h4>
+        <div class="about-us-entry">
+            <div class="about-us-img-wrapper">
+                <img src="/static/img/about_us.jpeg" class="about-us-img" alt="placeholder image">
             </div>
-            <div class="about-us-entry">
-                <p class="about-us-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam scelerisque lacinia lacinia.
-                    Morbi aliquam erat varius massa malesuada, nec feugiat dolor finibus. Sed posuere tristique enim
-                    eget tincidunt. Duis finibus eros felis, et vehicula nisi euismod scelerisque. Pellentesque a enim
-                    neque. Nulla eget ultrices enim, a bibendum mauris. Nulla sit amet mattis ex, non mollis eros.
-                    Maecenas vel fringilla velit. Nam bibendum turpis vel rhoncus blandit. Fusce id metus scelerisque,
-                    elementum ante eget, aliquet sem. Curabitur ac tellus ac lorem bibendum tincidunt lobortis et felis.
-                    Pellentesque in porttitor ipsum, non elementum neque
-                </p>
-                <div class="about-us-img-wrapper">
-                    <img src="/static/img/placeholder.png" class="about-us-img">
-                </div>
-            </div>
-        {% endfor %}
+            <p class="about-us-text">
+                Founded in 2023, the Illinois Global Review (IGR) began as a passion project among international relations students who wanted a space to share their voices, opinions, and research on global events. What started as a small initiative has since grown into a campus-wide publication dedicated to making international affairs accessible and engaging for all students. At its core, IGR empowers young thinkers to express their perspectives confidently and contribute meaningfully to conversations shaping our world.
+            </p>
+        </div>
     </div>
 {% endblock %}
