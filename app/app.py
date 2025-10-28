@@ -463,11 +463,6 @@ def dashboard():
 	return render_template('dashboard.html', article_list=get_all_articles(), current_user=current_user)
 
 
-@app.route('/about-us/', methods=['GET'])
-def about_us():
-	return render_template('about-us.html', title='About Us')
-
-
 @app.route('/robots.txt', methods=['GET'])
 def robots():
 	return send_file('static/txt/robots.txt')
