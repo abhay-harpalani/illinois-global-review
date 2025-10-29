@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import BooleanField, StringField, PasswordField, TextAreaField, SelectMultipleField, FieldList, FormField
 from wtforms.validators import DataRequired, EqualTo, Length
-from typing import List, Any
+from typing import List, Any, Dict
 from dataclasses import dataclass
 from dotenv import load_dotenv, dotenv_values
 import bcrypt
@@ -36,7 +36,7 @@ if not os.path.exists('app_files/tags.json'):
 	print('tags.json file not present')
 	exit(1)
 # keys are url subpaths and values are formatted tags names (e.g. north_america: North America)
-url_to_tag_dict = None
+url_to_tag_dict: Dict[str, str] = dict()
 # load tags from json file
 with open('app_files/tags.json', 'r') as f:
 	data = json.load(f)
@@ -262,7 +262,7 @@ def tags(requested_tag: str):
 	# get requested tag as formatted string
 	# for example 'North America' rather than 'north_america'
 	if requested_tag not in url_to_tag_dict:
-		print('error: section not found')
+		print('error: tag not found')
 		return redirect('/')
 	formatted_tag = url_to_tag_dict[requested_tag]
 
@@ -286,7 +286,7 @@ def tags(requested_tag: str):
 		return render_template('tag.html', title=formatted_tag, tagged_articles=tagged_articles,
 		                       current_user=current_user)
 	except TemplateError:
-		print('error rendering section', requested_tag)
+		print('error rendering tag', requested_tag)
 		return redirect('/')
 
 
