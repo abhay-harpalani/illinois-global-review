@@ -463,6 +463,11 @@ def dashboard():
 	return render_template('dashboard.html', article_list=get_all_articles(), current_user=current_user)
 
 
+@app.route('/about_us/', methods=['GET'])
+def about_us():
+	return render_template('about_us.html', title='About Us')
+
+
 @app.route('/robots.txt', methods=['GET'])
 def robots():
 	return send_file('static/txt/robots.txt')
@@ -489,4 +494,4 @@ def sitemap():
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=5002, debug=False)
+	app.run(host='0.0.0.0', port=5010, debug=False)
