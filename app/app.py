@@ -11,32 +11,27 @@ from wtforms import BooleanField, StringField, PasswordField, TextAreaField, Sel
 from wtforms.validators import DataRequired, EqualTo, Length
 from typing import List, Any, Dict
 from dataclasses import dataclass
-from dotenv import load_dotenv, dotenv_values
+from dotenv import dotenv_values
 import bcrypt
-from random import choices, randint
+from random import randint
 import json
+from pathlib import Path
 
 app = Flask(__name__)
 
 # 16 MB
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# create .env if it doesn't exist (used for user sessions)
-try:
-	with open('.env', 'x') as f:
-		# set key as 64 character long random string
-		ascii_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-		new_secret = ''.join(choices(ascii_chars, k=64))
-		f.write(f'SECRET={new_secret}')
-except FileExistsError:
-	pass
-load_dotenv()
-
 if not os.path.exists('app_files/tags.json'):
 	print('tags.json file not present')
 	exit(1)
+
+if not os.path.exists('.env'):
+	print('tags.json file not present')
+	exit(1)
+
 # keys are url subpaths and values are formatted tags names (e.g. north_america: North America)
-url_to_tag_dict: Dict[str, str] = dict()
+url_to_tag_dict = {}
 # load tags from json file
 with open('app_files/tags.json', 'r') as f:
 	data = json.load(f)
