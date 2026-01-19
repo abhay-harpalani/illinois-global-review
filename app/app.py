@@ -43,6 +43,15 @@ app.secret_key = dotenv_values('.env')['SECRET']
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+db_username = dotenv['POSTGRES_USERNAME']
+db_password = dotenv['POSTGRES_PASSWORD']
+db_conn_str = f'dbname=igr user={db_username} password={db_password}'
+
+# setup connection pool for db
+pool = ConnectionPool(db_conn_str, open=True)
+# close pool on program exit
+atexit.register(pool.close)
+
 
 class NewUserForm(FlaskForm):
 	email = StringField('Email Address', validators=[DataRequired(), Length(min=7)])
