@@ -151,21 +151,24 @@ class SitemapURL:
 
 @login_manager.user_loader
 def load_user(user_id: str) -> User | None:
-	try:
-		with open(f'users/{user_id}.txt', 'r') as f:
-			user_file = f.read()
-	except FileNotFoundError:
-		print(f'load_user({user_id}): could not find user')
-		return None
-	user_lines = user_file.split('\n')
-	if len(user_lines) != 4:
-		print(f'load_user({user_id}): file does not have exactly 4 lines (username, hashed_password, name, email)')
-		return None
-	username = user_lines[0]
-	hashed_password = user_lines[1]
-	name = user_lines[2]
-	email = user_lines[3]
-	return User(username=username, hashed_password=hashed_password, email=email, name=name)
+	with pool.connection() as conn:
+		with conn.cursor(row_factory=dict_row):
+			result = conn.execute(
+				'''SELECT hashed_password, name, email
+                   FROM users
+                   WHERE username = %(username)s''',
+				(user_id,),
+			).fetchone()
+			if result:
+				return User(
+					username=user_id,
+					hashed_password=result['hashed_password'],
+					name=result['name'],
+					email=result['email'],
+				)
+			else:
+				logging.warning(f'user not found for username={user_id}')
+				return None
 
 
 # returns Article object with the given id if found
