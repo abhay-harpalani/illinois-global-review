@@ -39,7 +39,9 @@ with open('app_files/tags.json', 'r') as f:
 	url_to_tag_dict = data
 print(f'url_to_tag_dict: {url_to_tag_dict}')
 
-app.secret_key = dotenv_values('.env')['SECRET']
+
+dotenv = dotenv_values('.env')
+app.secret_key = dotenv['SECRET']
 login_manager = LoginManager()
 login_manager.init_app(app)
 
