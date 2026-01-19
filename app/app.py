@@ -249,9 +249,8 @@ def save_article(article: Article) -> None:
 
 
 def get_article_creation_date_str(article: Article) -> str:
-	dt = datetime.fromtimestamp(int(article.creation_date_epoch))
-	ret = dt.strftime('%B %d, %Y')
-	return ret
+	# ex. January 5, 2003
+	return article.creation_datetime.strftime('%B %d, %Y')
 
 
 @app.context_processor
