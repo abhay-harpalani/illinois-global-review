@@ -79,13 +79,13 @@ class ArticleForm(FlaskForm):
 
 	# convert dict to list of tuples
 	article_tags = SelectMultipleField('Select any relevant tags:',
-	                                   choices=[(k, v) for k, v in url_to_tag_dict.items()])
+	                                   choices=[(k, v) for k, v in slug_to_display_name.items()])
 
 
-# updates the ArticleForm class, call this when url_to_tag_dict is updated
+# updates the ArticleForm class, call this when slug_to_display_name is updated
 def update_articleform_tag_choices():
 	ArticleForm.article_tags = SelectMultipleField('Select any relevant tags:',
-	                                               choices=[(k, v) for k, v in url_to_tag_dict.items()])
+	                                               choices=[(k, v) for k, v in slug_to_display_name.items()])
 
 
 class TagEditForm(FlaskForm):
@@ -240,7 +240,7 @@ def index():
 	# articles_small_card is a list of lists, where each inner element is a row of Article objects to be displayed
 	articles_small_card = [article_list[i:i + 3] for i in range(2, min(17, len(article_list)), 3)]
 	return render_template('index.html', title='Home', articles_big_card=articles_big_card,
-	                       articles_small_card=articles_small_card, url_to_tag_dict=url_to_tag_dict,
+	                       articles_small_card=articles_small_card, slug_to_display_name=slug_to_display_name,
 	                       current_user=current_user)
 
 
@@ -262,10 +262,10 @@ def articles(article_id: str):
 def tags(requested_tag: str):
 	# get requested tag as formatted string
 	# for example 'North America' rather than 'north_america'
-	if requested_tag not in url_to_tag_dict:
-		print('error: tag not found')
+	if slug not in slug_to_display_name:
+		print(f'error: tag "{slug}" not found')
 		return redirect('/')
-	formatted_tag = url_to_tag_dict[requested_tag]
+	formatted_tag = slug_to_display_name[slug]
 
 	tagged_article_list = []
 	for filename in os.listdir('articles/'):
@@ -298,16 +298,17 @@ def edit_tags(new_tag: str = None):
 	form = TagEditForm()
 	if form.validate_on_submit():
 		# edit tag list
-		global url_to_tag_dict
-		url_name = form.new_tag.data.lower().replace(' ', '_')
-		if url_name in url_to_tag_dict:
+		global slug_to_display_name
+		slug = form.new_tag.data.lower().replace(' ', '_')
+		if slug in slug_to_display_name:
 			flash('That tag already exists, please pick a different one.', 'danger')
 		else:
-			url_to_tag_dict[url_name] = form.new_tag.data
+			display_name = form.new_tag.data
+			slug_to_display_name[slug] = display_name
 			update_articleform_tag_choices()
 
 			with open('app_files/tags.json', 'w') as f:
-				f.write(json.dumps(url_to_tag_dict, indent=4))
+				f.write(json.dumps(slug_to_display_name, indent=4))
 			return redirect(url_for('dashboard'))
 	# serve form page
 	return render_template('edit_tags.html', form=form, current_user=current_user)
