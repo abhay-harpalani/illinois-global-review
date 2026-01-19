@@ -171,21 +171,6 @@ def load_user(user_id: str) -> User | None:
 				return None
 
 
-# returns Article object with the given id if found
-# otherwise returns None if an error was encountered
-def load_article(article_id: str) -> Any | None:
-	article_path = f'articles/{article_id}.json'
-	try:
-		with open(article_path, 'r') as f:
-			try:
-				# return Article and no error if json is valid
-				return json.load(f, object_hook=lambda d: Article(**d))
-			except json.JSONDecodeError as err:
-				print(f'load_article: json decode error for id {article_id}')
-				return None
-	except FileNotFoundError:
-		print(f'load_article: file not found error for id {article_id}')
-		return None
 def get_tags(article_id: str) -> List[str]:
 	with pool.connection() as conn:
 		with conn.cursor(row_factory=scalar_row):
@@ -199,6 +184,36 @@ def get_tags(article_id: str) -> List[str]:
 			# return a list of these elements by taking the first index
 			return [val[0] for val in results]
 
+
+def load_article(article_id: str) -> Article | None:
+	with pool.connection() as conn:
+		with conn.cursor(row_factory=dict_row) as cur:
+			article_dict = cur.execute(
+				'''SELECT article_id,
+                          title,
+                          author,
+                          creation_datetime,
+                          edit_datetime,
+                          cover_image_path,
+                          cover_image_alt_text,
+                          cover_image_source,
+                          citation,
+                          body
+                   FROM articles
+                   WHERE article_id = %s''',
+				(article_id,),
+			).fetchone()
+
+		if article_dict is None:
+			print(f'no article found for id={article_id}')
+			return None
+		article_dict['tags'] = get_tags(article_id)
+
+		try:
+			return Article(**article_dict)
+		except (ValueError, TypeError, KeyError, AttributeError) as e:
+			print(f'error loading article with article_id={article_id} and article_dict={article_dict}: {e}')
+			return None
 
 
 def save_article(article: Article) -> None:
