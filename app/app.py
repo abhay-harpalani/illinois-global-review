@@ -475,11 +475,11 @@ def sitemap():
 
 	# base_url will be 'https://globalreview.web.illinois.edu/' on main site
 	base_url = request.url_root
-	for art in all_articles:
-		art_loc = base_url + art.article_id
+	for article in all_articles:
+		article_loc = base_url + article.article_id
 		# formatted as YYYY-MM-DD, for example 2024-12-31
-		art_last_mod = time.strftime('%Y-%m-%d')
-		obj = SitemapURL(loc=art_loc, lastmod=art_last_mod)
+		article_last_mod = time.strftime('%Y-%m-%d')
+		obj = SitemapURL(loc=article_loc, lastmod=article_last_mod)
 		sitemap_urls.append(obj)
 
 	template = render_template('sitemap.html', sitemap_urls=sitemap_urls)
