@@ -216,10 +216,36 @@ def load_article(article_id: str) -> Article | None:
 			return None
 
 
+# to create, set article_id to None
+# to edit, set the article_id to the old article's id
 def save_article(article: Article) -> None:
-	article_path = f'articles/{article.article_id}.json'
-	with open(article_path, 'w') as f:
-		f.write(json.dumps(article.__dict__, indent=4))
+	with pool.connection() as conn:
+		with conn:
+			if article.article_id is None:
+				# is creation_datetime is NULL, it will default to the current time
+				# edit_datetime defaults to NULL
+				conn.execute(
+					"""INSERT INTO articles (title, author, creation_datetime, cover_image_path,
+                                             cover_image_alt_text, cover_image_source, citation, body)
+                       VALUES (%(title)s, %(author)s, %(creation_datetime)s, %(cover_image_path)s,
+                               %(cover_image_alt_text)s, %(cover_image_source)s, %(citation)s, %(body)s)""",
+					asdict(article),
+				)
+			else:
+				# does not update article_id or creation_datetime
+				conn.execute(
+					"""UPDATE articles
+                       SET title                = %(title)s,
+                           author               = %(author)s,
+                           edit_date            = COALESCE(%(edit_date)s, CURRENT_TIMESTAMP),
+                           cover_image_path     = %(cover_image_path)s,
+                           cover_image_alt_text = %(cover_image_alt_text)s,
+                           cover_image_source   = %(cover_image_source)s,
+                           citation             = %(citation)s,
+                           body                 = %(body)s
+                       WHERE article_id = %(article_id)s""",
+					asdict(article),
+				)
 
 
 def get_article_creation_date_str(article: Article) -> str:
