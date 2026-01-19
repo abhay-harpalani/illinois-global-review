@@ -94,27 +94,25 @@ class TagEditForm(FlaskForm):
 
 @dataclass
 class Article:
-	title: str
-	author: str
-	# id of the article, visible in URL
-	article_id: str
-	# creation date of the article represented as unix epoch time
-	creation_date_epoch: str
-	# date that the article was last edited
-	edit_date_epoch: str
-	# tags for the article (north america, europe, asia, africa, south america, oceania)
-	# abbreviated to 'na', 'sa', 'eu', 'af', 'as', 'oc'
-	tags: List[str]
-	# name of cover image so that /static/img/{cover_image_name} points to image location (includes file extension)
-	cover_image_name: str
+	title: str = ''
+	author: str = ''
+	# id of the article, also serves as url path
+	article_id: str = None
+	creation_datetime: datetime = None
+	edit_datetime: datetime = None
+	# tags for the article as a list of url-safe strings (ex. North America is north_america)
+	tags: List[str] = None
+	# path to cover image (stored in /static/article_img) including file extension
+	cover_image_path: str = ''
 	# alt text for image for screen readers
-	cover_image_alt_text: str
-	# source text under image
-	cover_image_source: str
-	# citation at bottom of page, has different format when viewing article page
-	citation: str
-	# content of the article formatted with html tags
-	body: str
+	cover_image_alt_text: str = ''
+	# source of the image as a url
+	cover_image_source: str = ''
+	# html-formatted citation
+	# automatically done client-side with
+	citation: str = ''
+	# html-formatted article body
+	body: str = ''
 
 
 # stores information on people allowed to manage articles
