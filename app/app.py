@@ -186,6 +186,19 @@ def load_article(article_id: str) -> Any | None:
 	except FileNotFoundError:
 		print(f'load_article: file not found error for id {article_id}')
 		return None
+def get_tags(article_id: str) -> List[str]:
+	with pool.connection() as conn:
+		with conn.cursor(row_factory=scalar_row):
+			results = conn.execute(
+				'''SELECT tag_slug AS slug
+                   FROM article_tags
+                   WHERE article_id = %s''',
+				(article_id,),
+			).fetchall()
+			# each value in results is a tuple with 1 element (the slug)
+			# return a list of these elements by taking the first index
+			return [val[0] for val in results]
+
 
 
 def save_article(article: Article) -> None:
