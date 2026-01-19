@@ -1,3 +1,4 @@
+import atexit
 import time
 from datetime import datetime
 import os
@@ -15,30 +16,17 @@ from dotenv import dotenv_values
 import bcrypt
 from random import randint
 import json
-from pathlib import Path
+from psycopg_pool import ConnectionPool
+import logging
 
 app = Flask(__name__)
 
 # 16 MB
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-if not os.path.exists('app_files/tags.json'):
-	print('tags.json file not present')
-	exit(1)
-
 if not os.path.exists('.env'):
-	print('tags.json file not present')
+	logging.critical('.env file not found')
 	exit(1)
-
-# keys are url subpaths and values are formatted tags names (e.g. north_america: North America)
-url_to_tag_dict = {}
-# load tags from json file
-with open('app_files/tags.json', 'r') as f:
-	data = json.load(f)
-	assert isinstance(data, dict)
-	url_to_tag_dict = data
-print(f'url_to_tag_dict: {url_to_tag_dict}')
-
 
 dotenv = dotenv_values('.env')
 app.secret_key = dotenv['SECRET']
@@ -53,6 +41,13 @@ db_conn_str = f'dbname=igr user={db_username} password={db_password}'
 pool = ConnectionPool(db_conn_str, open=True)
 # close pool on program exit
 atexit.register(pool.close)
+
+# dict for tags
+#   keys are url subpaths and values are formatted tag names (e.g. 'north_america': 'North America')
+slug_to_display_name = {}
+# load tags from db
+with pool.connection() as conn:
+	slug_to_display_name.update(conn.execute('SELECT slug, display_name FROM tags').fetchall())
 
 
 class NewUserForm(FlaskForm):
