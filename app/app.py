@@ -297,6 +297,40 @@ def get_all_articles() -> List[Article]:
 		return article_list
 
 
+def get_articles_with_tag(tag_slug: str) -> List[Article]:
+	with pool.connection() as conn:
+		with conn.cursor(row_factory=dict_row) as cur:
+			article_data_list = cur.execute(
+				'''SELECT article_id,
+                          title,
+                          author,
+                          creation_datetime,
+                          edit_datetime,
+                          cover_image_path,
+                          cover_image_alt_text,
+                          cover_image_source,
+                          citation,
+                          body
+                   FROM articles
+                            INNER JOIN (SELECT article_id FROM article_tags WHERE tag_slug = %s) AS all_articles
+                                       ON articles.article_id = all_articles.article_id
+                   ORDER BY creation_datetime DESC''',
+				(tag_slug,)
+			).fetchall()
+
+		article_list = []
+		for article_dict in article_data_list:
+			article_dict['tags'] = get_tags(article_dict['article_id'])
+			try:
+				article_list.append(
+					Article(**article_dict)
+				)
+			except (ValueError, TypeError, KeyError) as e:
+				print(f'error loading article with article_dict={article_dict}: {e}')
+				continue
+		return article_list
+
+
 ''' routing functions '''
 
 
