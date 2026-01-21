@@ -371,21 +371,7 @@ def tags(requested_tag: str):
 		return redirect('/')
 	formatted_tag = slug_to_display_name[slug]
 
-	tagged_article_list = []
-	for filename in os.listdir('articles/'):
-		full_filename = os.path.join('articles/', filename)
-		# only add to article list if it is a file
-		if os.path.isfile(full_filename):
-			art = load_article(filename[:-len('.json')])
-			if art is None:
-				print(f'tag({requested_tag}): error loading article {filename} with path {full_filename}')
-				continue
-			# only include articles with specified tag
-			if requested_tag in art.tags:
-				tagged_article_list.append(art)
-	# sort tagged_article_list in descending order so that the most recent articles are towards front of list
-	tagged_article_list.sort(key=lambda article: article.creation_date_epoch, reverse=True)
-
+	tagged_article_list = get_articles_with_tag(slug)
 	tagged_articles = [tagged_article_list[i:i + 3] for i in range(0, len(tagged_article_list), 3)]
 	try:
 		return render_template('tag.html', title=formatted_tag, tagged_articles=tagged_articles,
