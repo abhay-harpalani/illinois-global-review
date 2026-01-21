@@ -362,8 +362,8 @@ def articles(article_id: str):
 
 # tagged articles
 # includes continents (north america, south america, asia, etc.) and topics (international relations, wildlife, etc.)
-@app.route('/tags/<requested_tag>', methods=['GET'])
-def tags(requested_tag: str):
+@app.route('/tags/<slug>', methods=['GET'])
+def tags(slug: str):
 	# get requested tag as formatted string
 	# for example 'North America' rather than 'north_america'
 	if slug not in slug_to_display_name:
@@ -377,7 +377,7 @@ def tags(requested_tag: str):
 		return render_template('tag.html', title=formatted_tag, tagged_articles=tagged_articles,
 		                       current_user=current_user)
 	except TemplateError:
-		print('error rendering tag', requested_tag)
+		print(f'error rendering tag {slug}')
 		return redirect('/')
 
 
