@@ -265,20 +265,36 @@ def hash_password(password: str) -> str:
 
 
 def get_all_articles() -> List[Article]:
-	article_list = []
-	# traverse through all articles and add them to article_list
-	for filename in os.listdir('articles/'):
-		full_filename = os.path.join('articles/', filename)
-		# only add to article list if it is a file that ends in .json
-		if os.path.isfile(full_filename) and full_filename[-len('.json'):] == '.json':
-			art = load_article(filename[:-len('.json')])
-			if art is None:
-				print(f'get_all_articles: error loading article {filename} with path {full_filename}')
+	with pool.connection() as conn:
+		with conn.cursor(row_factory=dict_row) as cur:
+			article_data_list = cur.execute(
+				'''SELECT article_id,
+                          title,
+                          author,
+                          creation_datetime,
+                          edit_datetime,
+                          cover_image_path,
+                          cover_image_alt_text,
+                          cover_image_source,
+                          citation,
+                          body
+                   FROM articles
+                   ORDER BY creation_datetime DESC''',
+			).fetchall()
+
+		article_list = []
+		for article_dict in article_data_list:
+			article_dict['tags'] = get_tags(article_dict['article_id'])
+
+			try:
+				article_list.append(
+					Article(**article_dict)
+				)
+			except (ValueError, TypeError, KeyError, AttributeError) as e:
+				print(
+					f'error loading article with article_dict={article_dict}: {e}')
 				continue
-			article_list.append(art)
-	# sort article_list in descending order so that most recent articles are towards the top of the page
-	article_list.sort(key=lambda article: article.creation_date_epoch, reverse=True)
-	return article_list
+		return article_list
 
 
 ''' routing functions '''
